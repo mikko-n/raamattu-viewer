@@ -49,9 +49,18 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 	private final static int MODE_GOTO = 3;
 
 	// Selection
+        /*
+         * SELECTION_BOOK is assigned to value 0
+         */
 	private final static int SELECTION_BOOK = 0;
-	private final static int SELECTION_CHAPTER = 1;
-	private final static int SELECTION_VERSE = 2;
+	/*
+         * SELECTION_CHAPTER is assigned to value 1
+         */
+        private final static int SELECTION_CHAPTER = 1;
+	/*
+         * SELECTION_VERSE is assigned to value 2
+         */
+        private final static int SELECTION_VERSE = 2;
 	
 	private final static int SELECTION_BORDER = 5;
 	
@@ -120,6 +129,9 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 
         // Rectangle to determine where my Goto rectangle is. To receive pointer events
         Rectangle gotoRectangle = new Rectangle(0,0,0,0);
+        Rectangle bookRectangle = new Rectangle(0,0,0,0);
+        Rectangle chapterRectangle = new Rectangle(0,0,0,0);
+        Rectangle verseRectangle = new Rectangle(0,0,0,0);
 
 	/**
 	 * The verses of string. eg. Mark 1:1 of 45.
@@ -221,16 +233,37 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 	{
             super.pointerPressed(x, y);
             if (mode == MODE_GOTO) {
-                // If we receive a pointer event in Goto mode, the user
-                // is trying to use a touchscreen to navigate. But we don't
-                // support that yet, so we degrade into Goto Screen.
+                
+                // If we receive a pointer event in Goto mode, and the user
+                // is trying to use a touchscreen to navigate:
+                // We use goto-rectangle to handle drag and other rectangles
+                // to handle click events
                 if (gotoRectangle.contains(x, y)) {
-                    goBible.showGotoScreen();
+//                    goBible.showGotoScreen();
+                    
+                    if (bookRectangle.contains(x, y)) {
+                        selectionIndex = SELECTION_BOOK;
+                    }
+                    else if (chapterRectangle.contains(x, y)) {
+                        selectionIndex = SELECTION_CHAPTER;                    
+                    }
+                    else if (verseRectangle.contains(x, y)){
+                        selectionIndex = SELECTION_VERSE;
+                    }                
+                    
+                    firstX =  x;
+                    firstY =  y;
+                    savedX = savedY = 0;
+                    suspendEvents = false;
                 }
+                
                 else {
-                    // enter viewing mode
+                    // enter viewing mode                  
                     update();
                 }
+                
+                repaint(gotoRectangle.x, gotoRectangle.y, gotoRectangle.width, gotoRectangle.height);
+                
             }
             else if (mode == MODE_VIEWING) {
                 if (y <= barHeight) {
@@ -259,12 +292,13 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             super.pointerDragged(x, y);
 
             needCache = true;
-
+            double diffX = Math.abs(x - firstX);
+            double diffY = Math.abs(y - firstY);
+            
             if (mode == MODE_VIEWING) {
-                if (suspendEvents)
-                    return;
-                double diffX = Math.abs(x - firstX);
-                double diffY = Math.abs(y - firstY);
+                if (suspendEvents) {
+                    return;         
+                }
                 // Only change chapter if the horizontal distance moved is
                 // big enough.
                 if (diffX > diffY && diffX * 2 > width) {
@@ -289,27 +323,73 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                     repaint();
                 }
             }
+            if (mode == MODE_GOTO) {
+                if (suspendEvents) {
+                    return;
+                }                                
+                // if vertical scroll is long enough, change to next value
+                if (diffY > diffX && diffY > height/5) {
+                    
+                    if (savedY < 0) {
+                        // drag up, selection decrease                            
+                        keyPressed(getKeyCode(UP));
+                    } else {
+                        // drag down, selection increase
+                        keyPressed(getKeyCode(DOWN));
+                    }
+
+//                    suspendEvents=true;
+                    repaint();
+                }
+                else if (diffX > diffY && diffX > width / 5){
+                    if (savedX < 0) {
+                        keyPressed(getKeyCode(LEFT));
+                    } else {
+                        keyPressed(getKeyCode(RIGHT));
+                    }
+                }
+            }
         }
 
         protected void pointerMovingRelative(int x, int y, int delX, int delY)
 	{
-            if (mode == MODE_VIEWING) {
-                if (suspendEvents)
-                    return;
+            double diffX = Math.abs(x - firstX);
+            double diffY = Math.abs(y - firstY);
+            // if the change in 'x' is greater than the change in 'y'
+            if (diffY > diffX) {
+                if (mode == MODE_VIEWING) {
+                    if (suspendEvents) {
+                        return;
+                    }
 
-                double diffX = Math.abs(x - firstX);
-                double diffY = Math.abs(y - firstY);
-		// if the change in 'x' is greater than the change in 'y'
-		if (diffY > diffX)
-		{
                     int linesToScroll = (savedY + delY) / TextStyle.fontHeight;
                     pixelOffset = (savedY + delY) % TextStyle.fontHeight;
-                    
+
                     currentPassage.lineOffset -= linesToScroll;
 
                     savedY = savedY + delY - (linesToScroll * TextStyle.fontHeight);
 
                     repaint();
+                }
+                
+
+                if (mode == MODE_GOTO) {
+                    if (suspendEvents) {
+                        return;
+                    }
+                    int linesToScroll = (savedY + delY) / TextStyle.fontHeight;
+                    savedY = savedY + delY - (linesToScroll * TextStyle.fontHeight);
+                    repaint();
+                }
+            }      
+            if (diffX > diffY) {
+                if (mode==MODE_GOTO) {
+                    if (suspendEvents) {
+                        return;
+                    }
+                    int spaceWidth = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, TextStyle.fontSize).charWidth(' ');
+                    int linesToScroll = (savedX + delX) / spaceWidth;
+                    savedX = savedX + delX - (linesToScroll * spaceWidth);
                 }
             }
 	}
@@ -317,7 +397,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 	protected void pointerReleased(int x, int y)
 	{
             super.pointerReleased(x, y);
-            if (mode == MODE_VIEWING) {
+            if (mode == MODE_VIEWING || mode == MODE_GOTO) {
                 suspendEvents=false;
             }
         }
@@ -571,6 +651,15 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 		}
 	}
 
+        private void scrollToPreviousVerse() {
+            
+//            this.linesPerScreen
+            
+           
+//            int linesInVerse =countLines(, currentPassage);
+            
+        }
+        
 	public void keyPressed(int keyCode)
 	{
 		//this.keyCode = keyCode;
@@ -585,6 +674,8 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                     synchronized (currentPassage) {
                         if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_VERSE])
                         {
+                            scrollToPreviousVerse();
+                            
                             currentPassage.previousVerse();
                             keyHandled = true;
                         }
@@ -690,7 +781,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                     }
 		}
 		else if (mode == MODE_GOTO)
-		{
+		{                  
                     // The starting chapter or verse is usually 1
                     int startIndex = 1;
 
@@ -740,7 +831,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                         }
                     }
                     else
-                    {
+                    {                        
                         // If a number wasn't pressed then exit editing mode the current value will
                         // be validated below
                         editingSelection = false;
@@ -802,7 +893,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                              */
                             case UP:
                             {
-                                if (selectionIndex == 0) {
+                                if (selectionIndex == SELECTION_BOOK) {
                                     int impliedBook = goBible.bibleSource.getBookIdFromNumber(selection[0]);
                                     impliedBook --;
                                     if (impliedBook < 0) {
@@ -810,7 +901,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                                     }
                                     selection[0] = goBible.bibleSource.getBookNumberFromIndex(impliedBook);
                                 }
-                                else if(selectionIndex == 2) {
+                                else if(selectionIndex == SELECTION_VERSE) {
                                     int impliedBook = goBible.bibleSource.getBookIdFromNumber(selection[0]);
                                     int impliedVerse = goBible.bibleSource.getVerseIndexFromNumber(impliedBook, selection[1], selection[2]);
                                     impliedVerse --;
@@ -829,6 +920,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 
                             case DOWN:
                             {
+                                System.err.println("GameAction DOWN in goto mode");
                                 if (selectionIndex == 0) {
                                     int impliedBook = goBible.bibleSource.getBookIdFromNumber(selection[0]);
                                     impliedBook ++;
@@ -1200,7 +1292,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             this.gotoRectangle.y = boxTop;
             this.gotoRectangle.width = boxWidth - 1;
             this.gotoRectangle.height = boxHeight - 1;
-
+            
             // Draw a black outline
             g.setGrayScale(0);
             g.drawRect(boxLeft, boxTop, boxWidth - 1, boxHeight - 1);
@@ -1211,18 +1303,33 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             int halfSpace = spaceWidth >> 1;
             int doubleSpace = spaceWidth << 1;
 
+            bookRectangle.x = passageLeft - spaceWidth;
+            bookRectangle.y = passageTop - spaceWidth;
+            bookRectangle.width = widest + spaceWidth;
+            bookRectangle.height = fontHeight + doubleSpace;
+            
+            chapterRectangle.x = (chapterRight-chapterWidth)-spaceWidth;
+            chapterRectangle.y = passageTop-spaceWidth;
+            chapterRectangle.width = chapterWidth+spaceWidth+halfSpace;
+            chapterRectangle.height = fontHeight+doubleSpace;
+            
+            verseRectangle.x = (chapterRight+spaceWidth+colonWidth+halfSpace);
+            verseRectangle.y = passageTop-spaceWidth;
+            verseRectangle.width = verseWidth+doubleSpace;
+            verseRectangle.height = fontHeight+doubleSpace;
+            
             // Draw the background of the selected object
             if (selectionIndex == SELECTION_BOOK)
-            {
-                    g.fillRoundRect(passageLeft - spaceWidth, passageTop - spaceWidth, widest + spaceWidth, fontHeight + doubleSpace, BOX_CORNER, BOX_CORNER);
+            {                   
+                g.fillRoundRect(passageLeft - spaceWidth, passageTop - spaceWidth, widest + spaceWidth, fontHeight + doubleSpace, BOX_CORNER, BOX_CORNER);
             }
             else if (selectionIndex == SELECTION_CHAPTER)
             {
-                    g.fillRoundRect((chapterRight - chapterWidth) - halfSpace, passageTop - spaceWidth, chapterWidth + spaceWidth, fontHeight + doubleSpace, BOX_CORNER, BOX_CORNER);
+                g.fillRoundRect((chapterRight - chapterWidth) - halfSpace, passageTop - spaceWidth, chapterWidth + spaceWidth, fontHeight + doubleSpace, BOX_CORNER, BOX_CORNER);
             }
             else if (selectionIndex == SELECTION_VERSE)
             {
-                    g.fillRoundRect((chapterRight + spaceWidth + colonWidth + spaceWidth) - halfSpace, passageTop - spaceWidth, verseWidth + spaceWidth, fontHeight + doubleSpace, BOX_CORNER, BOX_CORNER);
+                g.fillRoundRect((chapterRight + spaceWidth + colonWidth + spaceWidth) - halfSpace, passageTop - spaceWidth, verseWidth + spaceWidth, fontHeight + doubleSpace, BOX_CORNER, BOX_CORNER);
             }
 
             // Draw the text in black
@@ -1253,7 +1360,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                 g.setColor(0xFFFFFFFF);
 
                 // Use the largest font for the middle button
-                font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_LARGE);
+                font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
                 g.setFont(font);
 
                 int menuBoxHeight = font.getHeight() + 5;
@@ -1278,7 +1385,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 	public void drawButton(Graphics g, String label, Font font, int position)
 	{
 		// Width of box depends on width of label plus a pixel either side
-		int buttonWidth = font.stringWidth(label) + 4;
+		int buttonWidth = font.stringWidth(label) + font.charWidth(' ');
 		
 		int buttonHeight = font.getHeight() + 3;
 		
@@ -2444,7 +2551,7 @@ class PassageReference {
         }
         lineOffset = 0;
     }
-    public void previousVerse() {
+    public void previousVerse() {                        
         verseIndex --;
         if (verseIndex < 0)
         {
