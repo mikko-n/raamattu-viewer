@@ -161,7 +161,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 
 	// position information used in the Touch event processing
 	private int firstX, firstY;
-	//private int diffX, diffY;
+	private int lastPointerX, lastPointerY;
 	private int savedX, savedY;
         private boolean suspendEvents = false;
         // disable caching for devices that don't need it (keypad devices)
@@ -251,9 +251,9 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                         selectionIndex = SELECTION_VERSE;
                     }                
                     
-                    firstX =  x;
-                    firstY =  y;
-                    savedX = savedY = 0;
+                    firstX = lastPointerX =  x;
+                    firstY = lastPointerY = y;
+                    savedX = savedY = 0;                    
                     suspendEvents = false;
                 }
                 
@@ -326,11 +326,13 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             if (mode == MODE_GOTO) {
                 if (suspendEvents) {
                     return;
-                }                                
+                }       
+                System.err.println("DiffX/Y: "+diffX+"/"+diffY+", x/y: "+x+"/"+y+", lastPointerX/Y:"+lastPointerX+"/"+lastPointerY+", ydiff="+Math.abs(y-lastPointerY));
                 // if vertical scroll is long enough, change to next value
-                if (diffY > diffX && diffY > height/5) {
+                
+                if (diffY > diffX && diffY > height/8 && Math.abs(y-lastPointerY) > 2) {
                     
-                    if (savedY < 0) {
+                    if (y < lastPointerY) {
                         // drag up, selection decrease                            
                         keyPressed(getKeyCode(UP));
                     } else {
@@ -341,13 +343,9 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 //                    suspendEvents=true;
                     repaint();
                 }
-                else if (diffX > diffY && diffX > width / 5){
-                    if (savedX < 0) {
-                        keyPressed(getKeyCode(LEFT));
-                    } else {
-                        keyPressed(getKeyCode(RIGHT));
-                    }
-                }
+                
+                lastPointerY = y;
+                lastPointerX = x;
             }
         }
 
@@ -378,7 +376,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                         return;
                     }
                     int linesToScroll = (savedY + delY) / TextStyle.fontHeight;
-                    savedY = savedY + delY - (linesToScroll * TextStyle.fontHeight);
+                    savedY = savedY+ delY - (linesToScroll * TextStyle.fontHeight);
                     repaint();
                 }
             }      

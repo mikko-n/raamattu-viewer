@@ -22,9 +22,17 @@
 //
 
 import java.io.*;
+import javax.microedition.io.*;
+import javax.microedition.io.file.FileConnection;
 
 public class CombinedChapterBibleSource extends BibleSource
 {
+    
+    private final static String FILE_SEPARATOR =
+            (System.getProperty("file.separator") != null) ? System.getProperty("file.separator") : "/";
+    
+    private final static String BIBLE_DATA = System.getProperty("fileconn.dir.memorycard")+FILE_SEPARATOR+"Raamatut"+FILE_SEPARATOR+"FinPR92";
+    
     private GoBible goBible = null;
     private Class resourceLoader;
 
@@ -80,11 +88,20 @@ public class CombinedChapterBibleSource extends BibleSource
         // We record the midlet as it may be required to access resources
         this.resourceLoader = resourceLoader;
 
+        String bibleLocation = BIBLE_DATA+"/Index";
+        
+        FileConnection con = (FileConnection) Connector.open(bibleLocation,Connector.READ);
+        
         // Read in the main index
-
-        DataInputStream input = new DataInputStream(resourceLoader.getResourceAsStream("Bible Data/Index"));
+        DataInputStream input = new DataInputStream(con.openInputStream());
+        
+//                new DataInputStream(
+//                resourceLoader.getResourceAsStream(
+//                    System.getProperty("fileconn.dir.memorycard")+FILE_SEPARATOR+"Raamatut"+FILE_SEPARATOR+"FinPR92/Index"));
+//        DataInputStream input = new DataInputStream(resourceLoader.getResourceAsStream("Bible Data/Index"));
 
         // Read in the number of books
+        
         numberOfBooks = input.read();
 
         bookNames = new String[numberOfBooks];
@@ -132,10 +149,14 @@ public class CombinedChapterBibleSource extends BibleSource
             }
         }
 
-        input.close();
+        input.close();        
 
         // Read in the reference lookup map
-        InputStream refLookup = resourceLoader.getResourceAsStream("Bible Data/Reference Lookup");
+        String referenceLocation = BIBLE_DATA+"/Reference Lookup";
+        con.close();
+        con = (FileConnection) Connector.open(referenceLocation, Connector.READ);
+        InputStream refLookup = con.openInputStream();
+//        InputStream refLookup = resourceLoader.getResourceAsStream("Bible Data/Reference Lookup");
         //System.err.println("DId you crash here?");
         if (refLookup != null) {
             input = new DataInputStream(refLookup);
@@ -300,7 +321,7 @@ public class CombinedChapterBibleSource extends BibleSource
 
         int reference = ((0xFF & bookIndex) << 24) | ((0xFF & chapterIndex) << 16) | (verseNumber & 0xFF);
 
-        System.err.println("Requested index of number " + bookIndex + " " + chapterIndex+ " " +verseNumber + " ");
+//        System.err.println("Requested index of number " + bookIndex + " " + chapterIndex+ " " +verseNumber + " ");
 
         for (int i=0; i<verseLookups.length; i++) {
             if ( (verseLookups[i] & 0xFFFF00FF) == reference ) { // upper 1st, 2nd and 4th bytes match
@@ -346,8 +367,15 @@ public class CombinedChapterBibleSource extends BibleSource
 
                 // Load the chapter as it will be different if either the chapter or book changed
                 //start = System.currentTimeMillis();
-
-                DataInputStream input = new DataInputStream(resourceLoader.getResourceAsStream("Bible Data/" + shortBookNames[bookIndex] + "/" + shortBookNames[bookIndex] + " " + currentFileIndex));
+//                FileConnection con = (FileConnection) Connector.open(FILE_SEPARATOR)
+                  
+                String currentString = BIBLE_DATA+"/"+ shortBookNames[bookIndex] + "/" + shortBookNames[bookIndex] + " " + currentFileIndex;
+        
+                FileConnection con = (FileConnection) Connector.open(currentString, Connector.READ);
+        
+                // Read in the main index
+                DataInputStream input = new DataInputStream(con.openInputStream());
+//                DataInputStream input = new DataInputStream(resourceLoader.getResourceAsStream("Bible Data/" + shortBookNames[bookIndex] + "/" + shortBookNames[bookIndex] + " " + currentFileIndex));
 
                 int length = input.readInt();
 
@@ -356,7 +384,7 @@ public class CombinedChapterBibleSource extends BibleSource
                 input.readFully(byteArray, 0, length);
 
                 input.close();
-
+                con.close();
                 //fileData = new String(byteArray, "UTF-8").toCharArray();
 
                 // Do our own UTF-8 conversion
@@ -460,7 +488,13 @@ public class CombinedChapterBibleSource extends BibleSource
 
         currentBookIndex = bookIndex;
 
-        DataInputStream input = new DataInputStream(resourceLoader.getResourceAsStream("Bible Data/" + shortBookNames[bookIndex] + "/Index"));
+        String booksIndex = BIBLE_DATA + "/" + shortBookNames[bookIndex] + "/Index";        
+        FileConnection con = (FileConnection) Connector.open(booksIndex, Connector.READ);
+        
+        // Read in the book index
+        DataInputStream input = new DataInputStream(con.openInputStream());
+               
+//        DataInputStream input = new DataInputStream(resourceLoader.getResourceAsStream("Bible Data/" + shortBookNames[bookIndex] + "/Index"));
 
         // Read each verse length in for each chapter
         for (int chapter = 0; chapter < numberOfChapters; chapter++)

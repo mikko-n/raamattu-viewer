@@ -879,6 +879,7 @@ public class GoBible extends MIDlet implements Runnable
     {
             try
             {
+                
                     // Read in the UI properties file
                     InputStream input = getClass().getResourceAsStream(UI_PROPERTIES_FILE_NAME);
 
@@ -920,10 +921,14 @@ public class GoBible extends MIDlet implements Runnable
 
                     // Read in last line
                     readUiPropertiesLine(uiPropertiesString, startOfLineIndex, uiPropertiesString.length());
+                    
             }
             catch (IOException e)
             {
                     e.printStackTrace();
+            }
+            catch (Exception ex) {
+                System.err.println("Read UI properties exception! "+ ex.getMessage());
             }
             }
 
@@ -1032,6 +1037,9 @@ public class GoBible extends MIDlet implements Runnable
         }
         catch (RecordStoreException e)
         {
+        }
+        catch (Exception ex) {
+           System.err.println("Read preferences exception! "+ ex.getMessage());
         }
     }
 
@@ -1148,6 +1156,9 @@ public class GoBible extends MIDlet implements Runnable
             catch (RecordStoreException e)
             {
             }
+            catch (Exception ex) {
+                System.err.println("Read bookmarks exception! "+ ex.getMessage());
+            }
     }
 
     /**
@@ -1194,7 +1205,7 @@ public class GoBible extends MIDlet implements Runnable
             }
             catch (RecordStoreException e)
             {
-            }
+            }           
     }
 
 
@@ -1219,6 +1230,9 @@ public class GoBible extends MIDlet implements Runnable
         catch (IOException ioe) {
         }
         catch (RecordStoreException rse) {
+        }
+        catch (Exception ex) {
+           System.err.println("Read key settings exception! "+ ex.getMessage());
         }
     }
 
