@@ -22,8 +22,13 @@
 //
 
 import java.io.*;
+import java.util.Timer;
 import javax.microedition.io.*;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.lcdui.Alert;
+import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Display;
+import javax.microedition.lcdui.Screen;
 
 public class CombinedChapterBibleSource extends BibleSource
 {
@@ -31,10 +36,10 @@ public class CombinedChapterBibleSource extends BibleSource
     private final static String FILE_SEPARATOR =
             (System.getProperty("file.separator") != null) ? System.getProperty("file.separator") : "/";
     
-    private final static String BIBLE_DATA = System.getProperty("fileconn.dir.memorycard")+FILE_SEPARATOR+"Raamatut"+FILE_SEPARATOR+"FinPR92";
+    private final static String BIBLE_DATA = System.getProperty("fileconn.dir.memorycard")+"Raamatut"+FILE_SEPARATOR+"FinPR92";
     
     private GoBible goBible = null;
-    private Class resourceLoader;
+//    private Class resourceLoader;
 
     // Current chapter loaded
     private int currentBookIndex = -1;
@@ -86,14 +91,28 @@ public class CombinedChapterBibleSource extends BibleSource
     {
         super(goBible);
         // We record the midlet as it may be required to access resources
-        this.resourceLoader = resourceLoader;
+//        this.resourceLoader = resourceLoader;
 
         String bibleLocation = BIBLE_DATA+"/Index";
-        
-        FileConnection con = (FileConnection) Connector.open(bibleLocation,Connector.READ);
-        
+        FileConnection con = null;
+        try {
+            con = (FileConnection) Connector.open(bibleLocation,Connector.READ);
+        } catch (IOException ioEx) {
+            
+            throw new IOException("Err opening conn: "+ioEx.getMessage()+", filepath: "+bibleLocation);
+            
+        }
         // Read in the main index
-        DataInputStream input = new DataInputStream(con.openInputStream());
+        DataInputStream input = null;
+        try {
+            input = new DataInputStream(con.openInputStream());
+        } catch (IOException ioEx) {
+            
+            throw new IOException("Err opening stream: "+ioEx.getMessage()
+                    +", isDir: "+con.isDirectory()                    
+                    + ", exists: "+con.exists()
+                    + ", url: "+con.getURL());
+        }
         
 //                new DataInputStream(
 //                resourceLoader.getResourceAsStream(

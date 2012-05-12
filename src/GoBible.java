@@ -301,6 +301,7 @@ public class GoBible extends MIDlet implements Runnable
         {
             error = true;
             System.out.println("Error");
+            
             display.setCurrent(new Alert(getString("UI-Error"), e.toString(), null, AlertType.ERROR));
         }
 
