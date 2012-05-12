@@ -61,7 +61,9 @@ public class GotoForm extends Form implements CommandListener
 		addCommand(cancelCommand);
 		
 		setCommandListener(this);
+                
 	}
+        
         protected void gotoPassage(int bk, int ch, int ve) {
             bookField.setSelectedIndex(bk, true);
             chapterField.setString("" + (ch + 1));
@@ -77,14 +79,33 @@ public class GotoForm extends Form implements CommandListener
                             int ch = 0;
                             int ve = 0;
                             try {
+                                
+                                int chaptersInBook = goBible.bibleSource.getNumberOfChapters(bookField.getSelectedIndex());                                
                                 ch = Integer.parseInt(chapterField.getString());
+                                
+                                // sanity check
+                                if (ch > chaptersInBook) {
+                                    ch = chaptersInBook;
+                                } else if (ch <= 0) {
+                                    ch = 1;
+                                }                                
                             }
                             catch (NumberFormatException nfe) {}
                             try {
+                                int versesInChapter = goBible.bibleSource.getNumberOfVerses(bookField.getSelectedIndex(), ch-1);                                
                                 ve = Integer.parseInt(verseField.getString());
-                            }catch (NumberFormatException nfe) {}
-                                goBible.bibleCanvas.gotoFormRequest(bookField.getSelectedIndex(), ch - 1, ve - 1);
-                                goBible.showMainScreen();
+                                                                
+                                // sanity check
+                                if (ve > versesInChapter) {
+                                    ve = versesInChapter;
+                                } else if (ve <= 0) {
+                                    ve = 1;
+                                }
+                                
+                            } catch (NumberFormatException nfe) {}
+                            
+                            goBible.bibleCanvas.gotoFormRequest(bookField.getSelectedIndex(), ch - 1, ve - 1);
+                            goBible.showMainScreen();
                             break;
 			}
 			case Command.BACK:
