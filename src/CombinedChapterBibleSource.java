@@ -36,10 +36,10 @@ public class CombinedChapterBibleSource extends BibleSource
     private final static String FILE_SEPARATOR =
             (System.getProperty("file.separator") != null) ? System.getProperty("file.separator") : "/";
     
-    private final static String BIBLE_DATA = System.getProperty("fileconn.dir.memorycard")+"Raamatut"+FILE_SEPARATOR+"FinPR92";
+    public final static String BIBLE_DATA_ROOT = System.getProperty("fileconn.dir.memorycard")+"Raamatut"+FILE_SEPARATOR;
+    private String BIBLE_DATA = BIBLE_DATA_ROOT +"FinPR92";
     
     private GoBible goBible = null;
-//    private Class resourceLoader;
 
     // Current chapter loaded
     private int currentBookIndex = -1;
@@ -83,16 +83,20 @@ public class CombinedChapterBibleSource extends BibleSource
 
     public CombinedChapterBibleSource(GoBible goBible) throws IOException
     {
-        this(goBible, goBible.getClass());
+        this(goBible, goBible.getTranslation());
         this.goBible = goBible;
     }
 
-    public CombinedChapterBibleSource(GoBible goBible, Class resourceLoader) throws IOException
+    public CombinedChapterBibleSource(GoBible goBible, String translationRoot) throws IOException
     {
         super(goBible);
-        // We record the midlet as it may be required to access resources
-//        this.resourceLoader = resourceLoader;
-
+        
+        if (translationRoot == "" ||translationRoot == null) {
+            BIBLE_DATA = BIBLE_DATA_ROOT +"FinPR92";
+        } else {
+            BIBLE_DATA = BIBLE_DATA_ROOT + translationRoot;
+        }
+        
         String bibleLocation = BIBLE_DATA+"/Index";
         FileConnection con = null;
         try {

@@ -98,6 +98,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 	private Command aboutCommand = new Command(GoBible.getString("UI-About"), Command.SCREEN, 0);
 	private Command exitCommand = new Command(GoBible.getString("UI-Exit"), Command.EXIT, 0);
 	private Command cancelCommand = new Command(GoBible.getString("UI-Cancel"), Command.CANCEL, 0);
+        private Command changeTranslationCommand = new Command(GoBible.getString("UI-Change-Translation"), Command.SCREEN, 0);
         
         private Command[] defaultCommands = {
             gotoCommand, /* Note this is a Command.OK command, so it will not appear on the list of usual commands */
@@ -111,6 +112,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             //sendMMSCommand, /* disabled */
             prefsCommand,
             keySettingsCommand, /*Extended UI */
+            changeTranslationCommand,
             aboutCommand,
             exitCommand
         };
@@ -620,6 +622,9 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                             else if (command == bookmarksCommand)
                             {
                                     goBible.showBookmarksScreen();
+                            }
+                            else if (command == changeTranslationCommand) {
+                                    goBible.showChangeTranslationScreen();
                             }
 
                             break;

@@ -121,6 +121,7 @@ public class GoBible extends MIDlet implements Runnable
     private PrefsForm prefsForm;
 
     private boolean firstRun = true;
+    
 
     public int currentBookIndex = 0;
     public int currentChapterIndex = 0;
@@ -142,7 +143,8 @@ public class GoBible extends MIDlet implements Runnable
     public char[] verseData;
 
     public BibleSource bibleSource;
-
+    private String translation = "FinPR92";
+    
     // Search preferences
     public String lastSearchString = "";
     public int lastFromBook = -1;
@@ -233,7 +235,8 @@ public class GoBible extends MIDlet implements Runnable
                 }
 
                 // Load the data in another thread allowing the splash screen to be seen
-                new Thread(this).start();
+                Thread data = new Thread(this);                
+                data.start();
             }
             catch (Throwable e)
             {
@@ -501,7 +504,21 @@ public class GoBible extends MIDlet implements Runnable
             gotoForm.gotoPassage(currentBookIndex, currentChapterIndex, currentVerseIndex);
             display.setCurrent(gotoForm);
     }
+    
+    public void showChangeTranslationScreen() 
+    {
+            SelectTranslationList selectTranslationList = new SelectTranslationList(this);
+            display.setCurrent(selectTranslationList);
+    }
 
+    public String getTranslation() {
+        return this.translation;
+    }
+    
+    public void setTranslation(String translationFolder) {
+        this.translation = translationFolder;
+    }
+    
     public void showAboutAlert()
     {
             String infoString = getAppProperty("Go-Bible-Info");
@@ -1437,8 +1454,10 @@ public class GoBible extends MIDlet implements Runnable
     }
 
     public void showStackTrace(Exception t, String fnName, String ch) {
-        javax.microedition.lcdui.TextBox tb = new TextBox("stuff", "", 65535, 0);
+        javax.microedition.lcdui.TextBox tb = new TextBox(GoBible.getString("UI-Error"), "", 65535, 0);
         tb.setString(t.toString() + "\n" + fnName + "\n" + ch + "\n" + currentBookIndex + "-" + currentChapterIndex);
+        Command exitCommand = new Command(GoBible.getString("UI-Exit"),Command.EXIT,0);
+        tb.addCommand(exitCommand);
         this.display.setCurrent(tb);
     }
 }
