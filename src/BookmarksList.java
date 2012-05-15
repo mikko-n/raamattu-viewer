@@ -21,7 +21,7 @@
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-import java.util.*;
+import java.util.Enumeration;
 import javax.microedition.lcdui.*;
 
 public class BookmarksList extends javax.microedition.lcdui.List implements CommandListener

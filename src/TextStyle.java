@@ -1,4 +1,5 @@
-import javax.microedition.lcdui.*;
+import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.Graphics;
 
 /**
  * Class to store and manage the text styles. The properties are booleans

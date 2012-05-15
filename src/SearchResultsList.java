@@ -22,8 +22,12 @@
 //
 
 
-import java.util.*;
-import javax.microedition.lcdui.*;
+import java.util.Enumeration;
+import java.util.Vector;
+import javax.microedition.lcdui.Choice;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Displayable;
 
 public class SearchResultsList extends javax.microedition.lcdui.List implements CommandListener
 {

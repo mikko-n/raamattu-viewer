@@ -21,7 +21,9 @@
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-import javax.microedition.lcdui.*;
+import javax.microedition.lcdui.CustomItem;
+import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.Graphics;
 
 /**
  * Essentially a StringItem that allows the text and background colours to be set.

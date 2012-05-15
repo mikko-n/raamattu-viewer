@@ -22,9 +22,12 @@
 //
 
 import java.io.IOException;
-import javax.microedition.io.*;
+import javax.microedition.io.Connector;
 import javax.microedition.lcdui.*;
-import javax.wireless.messaging.*;
+import javax.wireless.messaging.MessageConnection;
+import javax.wireless.messaging.MessagePart;
+import javax.wireless.messaging.MultipartMessage;
+import javax.wireless.messaging.TextMessage;
 
 /**
  *

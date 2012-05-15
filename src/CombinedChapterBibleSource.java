@@ -26,8 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
-import javax.microedition.lcdui.Alert;
-import javax.microedition.lcdui.AlertType;
 
 public class CombinedChapterBibleSource extends BibleSource {
 

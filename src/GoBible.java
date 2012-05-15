@@ -24,8 +24,9 @@ import java.io.*;
 import java.util.*;
 import javax.microedition.lcdui.*;
 import javax.microedition.lcdui.game.GameCanvas;
-import javax.microedition.midlet.*;
-import javax.microedition.rms.*;
+import javax.microedition.midlet.MIDlet;
+import javax.microedition.rms.RecordStore;
+import javax.microedition.rms.RecordStoreException;
 
 public class GoBible extends MIDlet implements Runnable
 {

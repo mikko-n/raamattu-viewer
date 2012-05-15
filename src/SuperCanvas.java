@@ -21,9 +21,9 @@
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-import javax.microedition.lcdui.*;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.microedition.lcdui.Canvas;
 
 /**
  *
