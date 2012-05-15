@@ -2,6 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import javax.microedition.io.Connector;
@@ -52,18 +53,21 @@ public class SelectTranslationList extends List implements CommandListener  {
     private void getAvailableTranslations() throws IOException {
         FileConnection con = null;
         try {
-            con = (FileConnection) Connector.open(CombinedChapterBibleSource.BIBLE_DATA_ROOT, Connector.READ);
+            con = (FileConnection) Connector.open(GoBible.BIBLE_DATA_ROOT, Connector.READ);
         } catch (IOException ioEx) {            
-            throw new IOException("Err opening conn: "+ioEx.getMessage()+", filepath: "+CombinedChapterBibleSource.BIBLE_DATA_ROOT);            
+            throw new IOException("Err opening conn: "+ioEx.getMessage()+", filepath: "+GoBible.BIBLE_DATA_ROOT);            
         }
         
         Enumeration enumer = con.list();
+        DataInputStream inp = null;
+        
         while (enumer.hasMoreElements()) {                                   
             String s = (String)enumer.nextElement();
-            
-            // list only dir
-            if (s.endsWith("/")) {
-                append(s, null);
+            String info = null;
+            // list only directories
+            if (s.endsWith("/")) {  
+                // without trailing slash
+                append(s.substring(0,s.length()-1), null);
             }
         }
     }
@@ -80,7 +84,6 @@ public class SelectTranslationList extends List implements CommandListener  {
                 goBible.setTranslation(this.getString(getSelectedIndex()));
                 goBible.run();
                 goBible.display.setCurrent(goBible.bibleCanvas);
-//                goBible.showMainScreen();
             }
             else {
                 switch (c.getCommandType()) {

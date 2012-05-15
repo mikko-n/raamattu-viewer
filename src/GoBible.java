@@ -122,7 +122,10 @@ public class GoBible extends MIDlet implements Runnable
 
     private boolean firstRun = true;
     
-
+    public final static String FILE_SEPARATOR =
+            (System.getProperty("file.separator") != null) ? System.getProperty("file.separator") : "/";
+    public final static String BIBLE_DATA_ROOT = System.getProperty("fileconn.dir.memorycard")+"Raamatut"+FILE_SEPARATOR;
+    
     public int currentBookIndex = 0;
     public int currentChapterIndex = 0;
     public int currentVerseIndex = 0;
@@ -306,6 +309,15 @@ public class GoBible extends MIDlet implements Runnable
             System.out.println("Error");
             
             display.setCurrent(new Alert(getString("UI-Error"), e.toString(), null, AlertType.ERROR));
+        }
+        catch (TranslationNotFoundException e) {
+            error = true;
+            Alert a = new Alert(GoBible.getString("UI-Translation-Not-Found"),
+                        GoBible.getString("UI-Translation-Not-Found"), null,
+                        AlertType.ERROR);
+            a.setTimeout(1500);
+            display.setCurrent(a, new SelectTranslationList(this));
+                
         }
 
         if (!error)
@@ -1047,6 +1059,9 @@ public class GoBible extends MIDlet implements Runnable
                 // Read in reverse colours
                 TextStyle.redLetter = input.readBoolean();
 
+                // Read in translation
+                translation = input.readUTF();
+                
                 input.close();
             }
         }
@@ -1107,7 +1122,9 @@ public class GoBible extends MIDlet implements Runnable
                     output.writeBoolean(bibleCanvas.needCache);
 
                     output.writeBoolean(TextStyle.redLetter);
-
+                    
+                    output.writeUTF(translation);
+                    
                     output.close();
 
                     byte[] data = byteArrayOutputStream.toByteArray();
