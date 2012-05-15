@@ -312,10 +312,10 @@ public class GoBible extends MIDlet implements Runnable
         }
         catch (TranslationNotFoundException e) {
             error = true;
-            Alert a = new Alert(GoBible.getString("UI-Translation-Not-Found"),
+            Alert a = new Alert(GoBible.getString("UI-Error"),
                         GoBible.getString("UI-Translation-Not-Found"), null,
                         AlertType.ERROR);
-            a.setTimeout(1500);
+            a.setTimeout(2000);
             display.setCurrent(a, new SelectTranslationList(this));
                 
         }
@@ -324,7 +324,7 @@ public class GoBible extends MIDlet implements Runnable
         {
             // Also create the goto screen for use later
             //gotoForm = new GotoForm(this);
-
+            
             showMainScreen();
         }
     }
@@ -536,7 +536,7 @@ public class GoBible extends MIDlet implements Runnable
             String infoString = getAppProperty("Go-Bible-Info");
             String safeAppName = getAppProperty("Go-Bible-Safe-Name");
             String regAppName = getAppProperty("Application-Name");
-
+                        
             String midletVersion = getAppProperty("MIDlet-Version");
             String midletName = getAppProperty("MIDlet-Name");
 
@@ -565,8 +565,11 @@ public class GoBible extends MIDlet implements Runnable
             // application name used in go bible creator
             // the manifest file still has GoBible hardcoded. Should change?
             //        		attributes.putValue("MIDlet-Name", collection.name + " " + applicationName);
-
-            display.setCurrent(new Alert(getString("UI-About") + " " + safeAppName, "Vendor: " + midletVendor + "\n" + midletInfoUrl + "\n\"For the glory of our Lord Jesus Christ and the furtherance of His Kingdom\"\n" + infoString + " Viewer Version: " + GBCoreVer, null, AlertType.INFO));
+            Alert a = new Alert(getString("UI-About") + " " + midletName, "Vendor: " + midletVendor + "\n" + midletInfoUrl + "\n\"For the glory of our Lord Jesus Christ and the furtherance of His Kingdom\"\n" + infoString + " Viewer Version: " + midletVersion, null, null);
+            a.setIndicator(null);            
+            a.addCommand(new Command(GoBible.getString("UI-OK"), Command.OK, 0));
+            
+            display.setCurrent(a);
     }
     /**
      * This method will cause goBible to LOAD the stated passage. It is used

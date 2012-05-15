@@ -58,6 +58,7 @@ public class SearchForm extends Form implements CommandListener, ItemCommandList
     {
             {GENESIS, REVELATION}, // All
             {-1, -1}, // Current book
+            {-1, -1}, // Selected range
             {MATTHEW, REVELATION}, // New Testament
             {GENESIS, MALACHI}, // Old Testament
             {MATTHEW, JOHN}, // Gospels
@@ -107,10 +108,11 @@ public class SearchForm extends Form implements CommandListener, ItemCommandList
             searchTextField.addCommand(searchNextCommand);
             searchTextField.setItemCommandListener(this);
 
-            bookChoiceGroup = new ChoiceGroup(GoBible.getString("UI-Books") + ":", Choice.EXCLUSIVE);
+            bookChoiceGroup = new ChoiceGroup(GoBible.getString("UI-Books") + ":", Choice.POPUP);
             bookChoiceGroup.append(GoBible.getString("UI-All"), null);
-            bookChoiceGroup.append(bookNames[goBible.bibleCanvas.currentBook()], null);
-
+            bookChoiceGroup.append(GoBible.getString("UI-Set-Range"), null);
+            bookChoiceGroup.append(bookNames[goBible.bibleCanvas.currentBook()], null);            
+            
             // If this collection contains the entire Bible then add options for
             // the testaments and other combinations
             if (bookNames.length == 66)
@@ -127,7 +129,7 @@ public class SearchForm extends Form implements CommandListener, ItemCommandList
                     bookChoiceGroup.append(GoBible.getString("UI-Minor-Prophets"), null);
             }
 
-            bookChoiceGroup.append(GoBible.getString("UI-Set-Range"), null);
+            
             this.setItemStateListener(this);
 
             // Default to All
@@ -171,7 +173,7 @@ public class SearchForm extends Form implements CommandListener, ItemCommandList
                                             // All
                                             to = bookNames.length - 1;
                                     }
-                                    else if (selectedIndex == 1)
+                                    else if (selectedIndex == 2)
                                     {
                                             // Current Book
                                             from = to = goBible.bibleCanvas.currentBook();
@@ -182,7 +184,7 @@ public class SearchForm extends Form implements CommandListener, ItemCommandList
                                             from = BOOK_RANGES[selectedIndex][0];
                                             to = BOOK_RANGES[selectedIndex][1];
                                     }
-                                    else if (selectedIndex == bookChoiceGroup.size() - 1) {
+                                    else if (selectedIndex == 1) {
                                         /* if for some reason, the order of books is reversed. The search algo
                                          supports "wrapping-around" from Revelation to Genesis. Not sure if we
                                          want this feature. */
@@ -195,11 +197,9 @@ public class SearchForm extends Form implements CommandListener, ItemCommandList
                                         from = fromBookChoiceGroup.getSelectedIndex();
                                         to = toBookChoiceGroup.getSelectedIndex();
                                         goBible.lastFromBook = fromBookChoiceGroup.getSelectedIndex();
-                                        goBible.lastToBook = toBookChoiceGroup.getSelectedIndex();
-                                        
+                                        goBible.lastToBook = toBookChoiceGroup.getSelectedIndex();                                        
                                     }
-
-
+                                    
                                     goBible.display.setCurrent(new SearchingCanvas(goBible, from, to, goBible.lastSearchString));
                             }
                             break;
@@ -216,7 +216,7 @@ public class SearchForm extends Form implements CommandListener, ItemCommandList
 
     public void itemStateChanged(Item i) {
         if (i == bookChoiceGroup) {
-            if (bookChoiceGroup.getSelectedIndex() == bookChoiceGroup.size() - 1) { // the Define Range... choice
+            if (bookChoiceGroup.getSelectedIndex() == 1) { // the Define Range... choice
                 this.append(fromBookChoiceGroup);
                 this.append(toBookChoiceGroup);
             }
