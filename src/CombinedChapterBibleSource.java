@@ -352,6 +352,23 @@ public class CombinedChapterBibleSource extends BibleSource {
 
         return verseData;
     }
+    
+    public char[] getVerse(int bookIndex, int chapterIndex, int verseNumber) throws IOException {
+        getChapter(bookIndex, chapterIndex);
+        
+        int verseIndex = getVerseIndexFromNumber(bookIndex, chapterIndex, verseNumber);
+                       
+        // Load some info for requested verse
+        int verseSize = 50; //getVerseIndexFromNumber(bookIndex, chapterIndex, verseNumber+1) - verseIndex;
+        System.out.println("Verse size: "+verseSize+", verse index: "+verseIndex);
+        
+        char[] verse = new char[verseSize];
+        
+        // Copy requested verse data out of verseData, change chapter if needed
+        System.arraycopy(verseData, verseIndex, verse, 0, verseSize);
+        System.err.println(verse);        
+        return verse;
+    }
 
     public int[] getChapterIndex(int bookIndex, int chapterIndex) throws IOException {
         // Load the chapter if it isn't loaded

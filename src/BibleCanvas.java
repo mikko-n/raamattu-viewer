@@ -403,6 +403,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
         }
 
         protected void pointerHeld(int x, int y) {
+            
             goBible.showGotoScreen();
         }
 
@@ -492,7 +493,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 //		{
 //			addCommand(gotoCommand);
 //		}
-		
+                
 		addDefaultCommands();
 	}
 
@@ -575,7 +576,8 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 			{
                             if (command == gotoCommand)
                             {
-                                enterGotoMode();
+                                goBible.showGotoScreen();
+                                // enterGotoMode();
                             }
 			}
 			
@@ -653,16 +655,8 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 			}
 		}
 	}
-
-        private void scrollToPreviousVerse() {
-            
-//            this.linesPerScreen
-            
-           
-//            int linesInVerse =countLines(, currentPassage);
-            
-        }
-        
+       
+              
 	public void keyPressed(int keyCode)
 	{
 		//this.keyCode = keyCode;
@@ -676,9 +670,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 		{
                     synchronized (currentPassage) {
                         if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_VERSE])
-                        {
-                            scrollToPreviousVerse();
-                            
+                        {                                 
                             currentPassage.previousVerse();
                             keyHandled = true;
                         }
@@ -778,7 +770,8 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 				}
 				else if (gameAction == FIRE || keyCode == goBible.keySettings[KeySettingsForm.ACTION_GOTO])
 				{
-					enterGotoMode();
+                                        goBible.showGotoScreen();
+//					enterGotoMode();
 				}
 			}
                     }

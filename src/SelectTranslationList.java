@@ -5,6 +5,7 @@
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.lcdui.*;
@@ -48,14 +49,31 @@ public class SelectTranslationList extends List implements CommandListener  {
     }
     
     /**
-     * Searches memory card for available translations
+     * Constructs list of available translations
      */
     private void getAvailableTranslations() throws IOException {
+        
+        Vector translations = listAvailableTranslations(this.goBible);
+        
+        for (int i = 0; i<translations.size(); i++) {
+            append((String)translations.elementAt(i), null);
+        }
+    }
+    
+    /**
+     * Searches memory card for available translations
+     * @return available translations
+     * @throws IOException 
+     */
+    public static Vector listAvailableTranslations(GoBible gobible) throws IOException {
+        
+        Vector translations = new Vector();
+                
         FileConnection con = null;
         try {
-            con = (FileConnection) Connector.open(GoBible.BIBLE_DATA_ROOT, Connector.READ);
+            con = (FileConnection) Connector.open(gobible.BIBLE_DATA_ROOT, Connector.READ);
         } catch (IOException ioEx) {            
-            throw new IOException("Err opening conn: "+ioEx.getMessage()+", filepath: "+GoBible.BIBLE_DATA_ROOT);            
+            throw new IOException("Err opening conn: "+ioEx.getMessage()+", filepath: "+gobible.BIBLE_DATA_ROOT);            
         }
         
         Enumeration enumer = con.list();
@@ -63,13 +81,15 @@ public class SelectTranslationList extends List implements CommandListener  {
         
         while (enumer.hasMoreElements()) {                                   
             String s = (String)enumer.nextElement();
-            String info = null;
+            
             // list only directories
             if (s.endsWith("/")) {  
                 // without trailing slash
-                append(s.substring(0,s.length()-1), null);
+                System.out.println(s);
+                translations.addElement(s.substring(0,s.length()-1));                                
             }
-        }
+        }        
+        return translations;    
     }
     
     public void commandAction(Command c, Displayable d) {

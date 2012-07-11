@@ -301,7 +301,8 @@ public class GoBible extends MIDlet implements Runnable
         // Read in the current chapter
         try
         {
-            bibleSource = new CombinedChapterBibleSource(this);
+            bibleSource = new MultiTranslationBibleSource(this);
+//            bibleSource = new CombinedChapterBibleSource(this);
             loadCurrentChapter();
         }
         catch (IOException e)
@@ -319,6 +320,11 @@ public class GoBible extends MIDlet implements Runnable
             a.setTimeout(2000);
             display.setCurrent(a, new SelectTranslationList(this));
                 
+        }
+        catch (Exception e) {
+            error = true;
+//            showStackTrace(e, "GoBible.run()", "Err");
+            e.printStackTrace();
         }
 
         if (!error)
