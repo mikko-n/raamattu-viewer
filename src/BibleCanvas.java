@@ -1189,7 +1189,8 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                             currentPassage.chapterIndex);
                     if (currentPassage.verseIndex >= numberOfVerses) {
                         currentPassage.verseIndex = numberOfVerses - 1;
-                        goBible.showStackTrace(new Exception("Verse exceeds number of verses"), "paint()", currentPassage.toString());
+                        goBible.showAlertMessage(goBible.getString("UI-Error-Verse-Exceeds-Index"), AlertType.CONFIRMATION);
+//                        goBible.showStackTrace(new Exception("Verse exceeds number of verses"), "paint()", currentPassage.toString());
                     }
                     PassageReference pcontext = currentPassage.clone();
                     
