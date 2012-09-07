@@ -976,7 +976,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             selection[SELECTION_CHAPTER] = chapterIndex;
             selection[SELECTION_VERSE] = verseIndex;
             validateSelection();
-            this.requestPassage(bookIndex, chapterIndex, verseIndex, 0);
+            userRequestPassage(bookIndex, chapterIndex, verseIndex);
         }
 	/**
 	 * Ensures that the current selection in the Go to screen is correct.
