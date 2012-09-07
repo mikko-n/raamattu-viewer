@@ -301,8 +301,27 @@ public class GoBible extends MIDlet implements Runnable
         // Read in the current chapter
         try
         {
-            bibleSource = new MultiTranslationBibleSource(this);
-//            bibleSource = new CombinedChapterBibleSource(this);
+//            bibleSource = new MultiTranslationBibleSource(this);
+            BibleSource uusi = new CombinedChapterBibleSource(this);
+                     
+            if (currentBookIndex > uusi.getNumberOfBooks()) {
+                currentBookIndex = 0;
+                currentChapterIndex = 0;
+                currentVerseIndex = 0;
+                System.err.println("[GoBible.java/run()] Book index mismatch, resetting book, chapter and verse");
+            }
+            else if (currentChapterIndex > uusi.getNumberOfChapters(currentBookIndex))
+            {
+                currentChapterIndex = 0;
+                currentVerseIndex = 0;
+                System.err.println("[GoBible.java/run()] Chapter index mismatch, resetting chapter and verse");
+            }
+            else if (currentVerseIndex > uusi.getNumberOfVerses(currentBookIndex, currentChapterIndex)) {
+                currentVerseIndex = 0;
+                System.err.println("[GoBible.java/run()] Verse index mismatch, resetting verse");
+            }
+            bibleSource = uusi;
+            
             loadCurrentChapter();
         }
         catch (IOException e)
@@ -426,16 +445,16 @@ public class GoBible extends MIDlet implements Runnable
             TextStyle.fontHeight = (int)(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, TextStyle.fontSize).getHeight() *
                     getLineHeight());
         } /* Setup styles */
-
+        
         display.setCurrent(bibleCanvas);
-
+        
         if (USE_MIDP20)
         {
                 bibleCanvas.setFullScreenMode(fullScreen);
         }
 
         // Some of the values may have changed so refresh the display accordingly
-        bibleCanvas.update();
+        bibleCanvas.update();      
     }
 
         public void addBookmark(PassageReference ref)
@@ -577,6 +596,17 @@ public class GoBible extends MIDlet implements Runnable
             a.addCommand(new Command(GoBible.getString("UI-OK"), Command.OK, 0));
             
             display.setCurrent(a);
+    }
+    
+    /**
+     * Convenience method to show an alert to user
+     * @param message 
+     */
+    public void showAlertMessage(String message, AlertType alerttype) {
+            Alert a = new Alert(getString("UI-About"), message, null, alerttype);
+            a.setIndicator(null);            
+            a.addCommand(new Command(GoBible.getString("UI-OK"), Command.OK, 0));            
+            display.setCurrent(a);    
     }
     /**
      * This method will cause goBible to LOAD the stated passage. It is used
@@ -1447,9 +1477,10 @@ public class GoBible extends MIDlet implements Runnable
         }
     }
 
-    public void loadCurrentChapter()
+    public void loadCurrentChapter() 
     {
-        System.err.println("[GoBible.java] Loading book " + currentBookIndex + " Chapter " + currentChapterIndex );
+        System.err.println("[GoBible.java] Loading book " + currentBookIndex + " Chapter " + currentChapterIndex + " Verse " + currentVerseIndex);
+        
         try
         {
             verseData = bibleSource.getChapter(currentBookIndex, currentChapterIndex);

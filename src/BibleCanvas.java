@@ -1056,7 +1056,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                 if (!isPainting) {
 		// Reset the verse scrolling
                     repaint();
-                    serviceRepaints();
+                    serviceRepaints();                    
                 }
 	}
 	
@@ -1144,7 +1144,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                 }
 
                 if (mode == MODE_VIEWING)
-                {
+                {                    
                     /* TODO: Use TextStyle instead? */
                     Font boldFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, goBible.FONT_SIZE_MAP[goBible.fontSize]);
                     Font plainFont = Font.getFont(Font.FACE_SYSTEM, goBible.fontStyle == GoBible.FONT_STYLE_BOLD ? Font.STYLE_BOLD : Font.STYLE_PLAIN, goBible.FONT_SIZE_MAP[goBible.fontSize]);
@@ -1162,12 +1162,27 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                             wrapPoint);
                     
                     // Do some sanity checks
+                    
+                    // book index overflow, translation changed, for example
+                    if (currentPassage.bookIndex > goBible.bibleSource.getNumberOfBooks()) {
+                        System.err.println("[BibleCanvas.paint()] currentPassage.bookIndex reset");
+                        currentPassage.bookIndex = goBible.currentBookIndex;
+                        
+                        // TODO: siirtyminen suoraan select translation listille?
+                        goBible.showAlertMessage(goBible.getString("UI-Error-Book-Not-Found-In-Translation"), AlertType.CONFIRMATION);
+                    }
                     int numberOfChapters = goBible.bibleSource.getNumberOfChapters(
                             currentPassage.bookIndex);
+                    
                     if (currentPassage.chapterIndex >= numberOfChapters) {
-                        currentPassage.chapterIndex = numberOfChapters - 1;
-                        // hardline stance:
-                        goBible.showStackTrace(new Exception("Chapter exceeds number of chapters"), "paint()", currentPassage.toString());
+//                        currentPassage.chapterIndex = numberOfChapters - 1;
+                        currentPassage.chapterIndex = goBible.currentChapterIndex;                        
+                        
+                        // TODO: siirtyminen suoraan select translation listille?
+                        goBible.showAlertMessage(goBible.getString("UI-Error-Chapter-Exceeds-Index"), AlertType.CONFIRMATION);
+                        
+                        // hardline stance:                        
+//                        goBible.showStackTrace(new Exception("Chapter exceeds number of chapters"), "paint()", currentPassage.toString());
                     }
                     int numberOfVerses = goBible.bibleSource.getNumberOfVerses(
                             currentPassage.bookIndex,

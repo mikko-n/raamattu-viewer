@@ -386,7 +386,7 @@ public class CombinedChapterBibleSource extends BibleSource {
                 if (currentBookIndex != bookIndex) {
                     loadBookIndex(bookIndex);
                 }
-
+                System.err.println("[CombinedChapterBibleSource.loadChapter("+bookIndex+", "+chapterIndex+")");
                 currentFileIndex = combinedChapterIndex[bookIndex][chapterIndex << 2];
 
                 // Load the chapter as it will be different if either the chapter or book changed
