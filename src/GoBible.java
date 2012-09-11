@@ -47,7 +47,7 @@ public class GoBible extends MIDlet implements Runnable
 
     // Theme indices
     public final static int THEME_PAPER = 0;
-    public final static int THEME_COMPUTER = 1;
+    public final static int THEME_NIGHT = 1;
     public final static int THEME_FLORAL = 2;
     public final static int THEME_NATURAL = 3;
     public final static int THEME_BLUE = 4;
@@ -57,7 +57,7 @@ public class GoBible extends MIDlet implements Runnable
     public final static int[] THEME_TEXT_COLOUR = new int[]
     {
             0x000000,
-            0x00FF00,
+            0xC3C3C3,
             0x660066,
             0x883300,
             0x000088,
@@ -79,7 +79,7 @@ public class GoBible extends MIDlet implements Runnable
     public final static int[] THEME_HIGHLIGHT_COLOUR = new int[]
     {
             0xE0E0FF,
-            0x005500,
+            0x555555,
             0xDDC0DD,
             0xCCFFCC,
             0xFFFFFF,
@@ -90,7 +90,7 @@ public class GoBible extends MIDlet implements Runnable
     public final static int[] THEME_CHRIST_COLOUR = new int[]
     {
             0xC00000,
-            0xFF8800,
+            0xFFA991,
             0x006666,
             0x006600,
             0xD00000,
@@ -535,12 +535,40 @@ public class GoBible extends MIDlet implements Runnable
 
     public void showGotoScreen()
     {
-            GotoForm gotoForm = null;
+//            GotoForm gotoForm = null;
+//            if (gotoForm == null) {
+//                gotoForm = new GotoForm(this);
+//            }
+            GotoFormBook gotoForm = null;
             if (gotoForm == null) {
-                gotoForm = new GotoForm(this);
+                gotoForm = new GotoFormBook(this);
             }
             gotoForm.gotoPassage(currentBookIndex, currentChapterIndex, currentVerseIndex);
             display.setCurrent(gotoForm);
+    }
+    
+    public void showGotoChapterScreen(int book)
+    {
+        GotoFormChapter gotoFormChapter = null;
+        if (gotoFormChapter == null) {
+            gotoFormChapter = new GotoFormChapter(this, book);
+        }
+        
+        gotoFormChapter.gotoPassage(book, 0, 0);
+        
+        display.setCurrent(gotoFormChapter);
+    }
+    
+    public void showGotoVerseScreen(int book, int chapter)
+    {
+        GotoFormVerse gotoFormVerse = null;
+        if (gotoFormVerse == null) {
+            gotoFormVerse = new GotoFormVerse(this, book, chapter);
+        }
+        
+        gotoFormVerse.gotoPassage(book, chapter, 0);
+        
+        display.setCurrent(gotoFormVerse);
     }
     
     public void showChangeTranslationScreen() 
