@@ -27,15 +27,11 @@ import javax.microedition.lcdui.*;
 public class GotoFormBook extends Form implements ItemCommandListener, CommandListener
 {
 	private GoBible goBible;
-        private int bookIndex;
-        private int chapterIndex;
-        private int verseIndex;
         
-	private Command gotoCommand = new Command(GoBible.getString("UI-Goto"), Command.OK, 0);
 	private Command cancelCommand = new Command(GoBible.getString("UI-Cancel"), Command.CANCEL, 0);
 	
-	/**
-	 * Creates a search for with search criteria and from and to books to search
+    /**
+     * Creates a search for with search criteria and from and to books to search
      * in.
      */
     public GotoFormBook(GoBible goBible) {
@@ -84,18 +80,11 @@ public class GotoFormBook extends Form implements ItemCommandListener, CommandLi
 
         }
 
-        addCommand(gotoCommand);
         addCommand(cancelCommand);
 
         setCommandListener(this);
 
     }
-        
-        protected void gotoPassage(int bk, int ch, int ve) {
-            bookIndex = bk;
-            chapterIndex = ch+1;
-            verseIndex = ve+1;
-        }
 	
         /**
          * Gui buttons
@@ -129,20 +118,10 @@ public class GotoFormBook extends Form implements ItemCommandListener, CommandLi
                 int ve = 0;
                 int chaptersInBook = goBible.bibleSource.getNumberOfChapters(bookindex);
 
-                try {
-                    ch = chapterIndex;
-
-                    // sanity check
-                    if (ch > chaptersInBook) {
-                        ch = chaptersInBook;
-                    } else if (ch <= 0) {
-                        ch = 1;
-                    }
-                } catch (NumberFormatException nfe) {
-                }
 
                 // only 1 chapter, skip chapter selection and show verse selection instead
                 if (chaptersInBook == 1) {
+                    System.out.println("[GotoFormBook.commandAction()] only 1 chapter, skipping chapter selection (book "+bookindex+", chapter "+ch);
                     goBible.showGotoVerseScreen(bookindex, ch);
                     break;
                 }

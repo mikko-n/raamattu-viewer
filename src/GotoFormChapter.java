@@ -37,11 +37,9 @@ public class GotoFormChapter extends Form implements ItemCommandListener, Comman
 	private GoBible goBible;
 
         private int bookIndex;
-        private int chapterIndex;
-        private int verseIndex;
-        
-	private Command gotoCommand = new Command(GoBible.getString("UI-Goto"), Command.OK, 0);
+                
 	private Command cancelCommand = new Command(GoBible.getString("UI-Cancel"), Command.CANCEL, 0);
+        private Command backCommand = new Command(GoBible.getString("UI-Back"), Command.OK, 0);
 	
 	/**
 	 * Creates a search for with search criteria and from and to books to search in.
@@ -83,18 +81,16 @@ public class GotoFormChapter extends Form implements ItemCommandListener, Comman
                     im.setItemCommandListener(this);
                     this.append(im);
                 }
-
-		addCommand(gotoCommand);
+                
 		addCommand(cancelCommand);
+                addCommand(backCommand);		
 		
 		setCommandListener(this);
                 
 	}
         
         protected void gotoPassage(int bk, int ch, int ve) {
-            bookIndex = bk;
-            chapterIndex = ch; // note, here is a possibility to off-by-one error as GotoFormBook.java already adds one!!
-            verseIndex = ve;
+            bookIndex = bk;        
         }
 	
         /**
@@ -106,11 +102,12 @@ public class GotoFormChapter extends Form implements ItemCommandListener, Comman
 	{
             switch (command.getCommandType())
             {			
-                case Command.BACK: 
+                case Command.OK: 
                 {
                     goBible.showGotoScreen();
                     break;
                 }
+                case Command.BACK:
                 case Command.CANCEL: 
                 {
                     goBible.showMainScreen();

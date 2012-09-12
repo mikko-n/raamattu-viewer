@@ -29,9 +29,9 @@ public class GotoFormVerse extends Form implements ItemCommandListener, CommandL
     private GoBible goBible;
     private int bookIndex;
     private int chapterIndex;
-    private int verseIndex;
-    private Command gotoCommand = new Command(GoBible.getString("UI-Goto"), Command.OK, 0);
+    
     private Command cancelCommand = new Command(GoBible.getString("UI-Cancel"), Command.CANCEL, 0);
+    private Command backCommand = new Command(GoBible.getString("UI-Back"), Command.OK, 0);
 
     /**
      * Creates a search for with search criteria and from and to books to search
@@ -46,8 +46,14 @@ public class GotoFormVerse extends Form implements ItemCommandListener, CommandL
         
         int verseCount = goBible.bibleSource.getNumberOfVerses(bookIndex, chapterIndex);
         Font f = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-        int width = f.stringWidth(String.valueOf(verseCount - 1)) + 4;
-
+//        int width = f.stringWidth(String.valueOf(verseCount - 1)) + 4;
+        int width;
+        if (verseCount <= 9) {
+            width = f.stringWidth("0" + String.valueOf(verseCount)) + 4;
+        } else {
+            width = f.stringWidth(String.valueOf(verseCount)) + 4;
+        }
+                
         int height = f.getHeight() + 2;
       
         for (int i = 0; i <= verseCount-1; i++) {
@@ -64,13 +70,13 @@ public class GotoFormVerse extends Form implements ItemCommandListener, CommandL
             im.setDefaultCommand(new Command("Set", Command.ITEM, 1));
             im.setPreferredSize(width, height);
 
-            // icl is ItemCommandListener   
+            // im is ItemCommandListener   
             im.setItemCommandListener(this);
             this.append(im);
 
         }
 
-        addCommand(gotoCommand);
+        addCommand(backCommand);
         addCommand(cancelCommand);
 
         setCommandListener(this);
@@ -79,8 +85,7 @@ public class GotoFormVerse extends Form implements ItemCommandListener, CommandL
 
     protected void gotoPassage(int bk, int ch, int ve) {
         bookIndex = bk;
-        chapterIndex = ch;
-        verseIndex = ve;
+        chapterIndex = ch;    
     }
 	
     /**
@@ -91,11 +96,12 @@ public class GotoFormVerse extends Form implements ItemCommandListener, CommandL
      */
     public void commandAction(Command command, Displayable display) {
         switch (command.getCommandType()) {
-            case Command.BACK:
+            case Command.OK:
             {
                 goBible.showGotoChapterScreen(bookIndex);
                 break;
             }
+            case Command.BACK:
             case Command.CANCEL: {
                 goBible.showMainScreen();
                 break;
@@ -109,18 +115,18 @@ public class GotoFormVerse extends Form implements ItemCommandListener, CommandL
      * @param c
      * @param item
      */
-    public void commandAction(Command c, Item item) 
-    {
-        switch (c.getCommandType())
-		{
-            case Command.ITEM: {
+    public void commandAction(Command c, Item item) {
+        switch (c.getCommandType()) 
+        {
+            case Command.ITEM: 
+            {
                 int bookindex = this.bookIndex;
                 int ch = this.chapterIndex;
                 int ve = (int) Integer.parseInt(((ImageItem) item).getAltText());
-                System.out.println("[GotoFormVerse.commandAction()] before sanity check - book: "+this.bookIndex+", chapter: "+ch+", verse: "+ve);
+                System.out.println("[GotoFormVerse.commandAction()] before sanity check - book: " + this.bookIndex + ", chapter: " + ch + ", verse: " + ve);
                 try {
                     int versesInChapter = goBible.bibleSource.getNumberOfVerses(bookindex, ch);
-                    
+
                     // sanity check
                     if (ve > versesInChapter) {
                         ve = versesInChapter;
@@ -131,11 +137,11 @@ public class GotoFormVerse extends Form implements ItemCommandListener, CommandL
                 } catch (NumberFormatException nfe) {
                 }
 
-                System.out.println("[GotoFormVerse.commandAction()] gotoform request- book: "+this.bookIndex+", chapter: "+ch+", verse: "+ve);
+                System.out.println("[GotoFormVerse.commandAction()] gotoform request- book: " + this.bookIndex + ", chapter: " + ch + ", verse: " + ve);
                 goBible.bibleCanvas.gotoFormRequest(bookindex, ch, ve);
                 goBible.showMainScreen();
                 break;
             }
         }
-    }    
+    } 
 }

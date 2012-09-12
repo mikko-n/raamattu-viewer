@@ -543,7 +543,7 @@ public class GoBible extends MIDlet implements Runnable
             if (gotoForm == null) {
                 gotoForm = new GotoFormBook(this);
             }
-            gotoForm.gotoPassage(currentBookIndex, currentChapterIndex, currentVerseIndex);
+//            gotoForm.gotoPassage(currentBookIndex, currentChapterIndex, currentVerseIndex);
             display.setCurrent(gotoForm);
     }
     
