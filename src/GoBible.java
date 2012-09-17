@@ -32,6 +32,8 @@ public class GoBible extends MIDlet implements Runnable
 {
     // Compile time constants
     public final static boolean USE_MIDP20 = true;
+    
+    public final static boolean ZIP_COMPLIANT = true;
 
     public final static String UI_PROPERTIES_FILE_NAME = "/ui.properties";
     public final static String GBCoreVer = "2.4.99";	// the version of this Core application
@@ -306,7 +308,7 @@ public class GoBible extends MIDlet implements Runnable
         try
         {
 //            bibleSource = new MultiTranslationBibleSource(this);
-            BibleSource uusi = new CombinedChapterBibleSource(this);
+            BibleSource uusi = new CombinedChapterBibleSourceZip(this);
                      
             if (currentBookIndex > uusi.getNumberOfBooks()) {
                 currentBookIndex = 0;
@@ -586,7 +588,11 @@ public class GoBible extends MIDlet implements Runnable
     }
     
     public void setTranslation(String translationFolder) {
-        this.translation = translationFolder;
+        if (ZIP_COMPLIANT) {
+            this.translation = translationFolder+".zip";
+        } else {
+            this.translation = translationFolder;
+        }
     }
     
     public void showAboutAlert()

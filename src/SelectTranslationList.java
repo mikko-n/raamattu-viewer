@@ -82,11 +82,21 @@ public class SelectTranslationList extends List implements CommandListener  {
         while (enumer.hasMoreElements()) {                                   
             String s = (String)enumer.nextElement();
             
-            // list only directories
-            if (s.endsWith("/")) {  
-                // without trailing slash
-                System.out.println(s);
-                translations.addElement(s.substring(0,s.length()-1));                                
+            if (gobible.ZIP_COMPLIANT) {
+                // list only zip files
+                if (s.endsWith(".zip")) {
+                    // without trailing slash
+                    System.out.println(s);
+                    translations.addElement(s.substring(0, s.length() - 4));
+                }
+            }
+            else {
+                // list only directories
+                if (s.endsWith("/")) {
+                    // without trailing slash
+                    System.out.println(s);
+                    translations.addElement(s.substring(0, s.length() - 1));
+                }
             }
         }        
         return translations;    
