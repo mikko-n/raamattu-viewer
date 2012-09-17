@@ -125,7 +125,10 @@ public class GoBible extends MIDlet implements Runnable
     
     public final static String FILE_SEPARATOR =
             (System.getProperty("file.separator") != null) ? System.getProperty("file.separator") : "/";
-    public final static String BIBLE_DATA_ROOT = System.getProperty("fileconn.dir.memorycard")+"Raamatut"+FILE_SEPARATOR;
+    
+    public final static String BIBLE_DATA_ROOT = 
+            (System.getProperty("fileconn.dir.memorycard") != null) ? System.getProperty("fileconn.dir.memorycard")+"Raamatut"+FILE_SEPARATOR :
+            "file:"+FILE_SEPARATOR+FILE_SEPARATOR+"CFROOT"+FILE_SEPARATOR+"Raamatut"+FILE_SEPARATOR;
     
     public int currentBookIndex = 0;
     public int currentChapterIndex = 0;
@@ -205,7 +208,8 @@ public class GoBible extends MIDlet implements Runnable
     public long skipTime;
 
     public void startApp()
-    {
+    {   
+        System.out.println("[GoBible.startApp()] BIBLE_DATA_ROOT = "+BIBLE_DATA_ROOT);
         // Try to turn on the backlight
         turnOnBacklight();
 

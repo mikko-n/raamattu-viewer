@@ -78,7 +78,10 @@ public class CombinedChapterBibleSource extends BibleSource {
             BIBLE_DATA = GoBible.BIBLE_DATA_ROOT + translationRoot;
         }
 
-        String bibleLocation = BIBLE_DATA + "/Index";
+        String bibleLocation = BIBLE_DATA + GoBible.FILE_SEPARATOR+"Index";
+        System.out.println("[CombinedChapterBibleSource.const] biblelocation = "+bibleLocation);
+        
+                
         FileConnection con = null;
         try {
             con = (FileConnection) Connector.open(bibleLocation, Connector.READ);
