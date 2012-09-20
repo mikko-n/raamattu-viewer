@@ -589,7 +589,24 @@ public class GoBible extends MIDlet implements Runnable
     
     public void setTranslation(String translationFolder) {
         if (ZIP_COMPLIANT) {
-            this.translation = translationFolder+".zip";
+            
+            char[] nameChars = translationFolder.toCharArray();
+            char[] fileNameChars = new char[nameChars.length];
+
+            int j = 0;
+
+            // clean white spaces
+            for (int i = 0; i < nameChars.length; i++) 
+            {
+                if (nameChars[i] != ' ') {
+                    fileNameChars[j] = nameChars[i];
+                    j++;
+                }
+            }
+
+            this.translation = new String(fileNameChars, 0, j) + ".zip";
+
+//            this.translation = translationFolder+".zip";
         } else {
             this.translation = translationFolder;
         }

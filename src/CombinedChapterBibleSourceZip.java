@@ -85,7 +85,7 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
         }
         System.out.println("[CombinedChapterBibleSource.const] BIBLE_DATA = "+BIBLE_DATA);
         
-        String bibleLocation = "Index";
+        String bibleLocation = "Bible Data/Index";
         System.out.println("[CombinedChapterBibleSource.const] biblelocation = "+bibleLocation);
         
         RandomReadingFile rrf = new RandomReadingFile(BIBLE_DATA);
@@ -165,7 +165,7 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
             input.close();
 
             // Read in the reference lookup map
-            String referenceLocation = "Reference Lookup";
+            String referenceLocation = "Bible Data/Reference Lookup";
             
             ze = null;
             ze = zipFile.getEntry(referenceLocation);
@@ -402,7 +402,7 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
                 //start = System.currentTimeMillis();
 //                FileConnection con = (FileConnection) Connector.open(FILE_SEPARATOR)
 
-                String currentString = shortBookNames[bookIndex] + "/" + shortBookNames[bookIndex] + " " + currentFileIndex;
+                String currentString = "Bible Data/"+shortBookNames[bookIndex] + "/" + shortBookNames[bookIndex] + " " + currentFileIndex;
 
                 ZipEntry ze = zipFile.getEntry(currentString);
 
@@ -509,7 +509,7 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
 
         currentBookIndex = bookIndex;
 
-        String booksIndex = shortBookNames[bookIndex] + "/Index";
+        String booksIndex = "Bible Data/"+shortBookNames[bookIndex] + "/Index";
         ZipEntry ze = zipFile.getEntry(booksIndex);
         
         // Read in the book index
