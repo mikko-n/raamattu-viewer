@@ -44,6 +44,7 @@ public class TextStyle {
 
     public static int christWordsColour = 0xD00000;
     public static int textColour = 0x000000;
+    public static int backColour = 0xFFFFFF;
     public static int fauxItalicColour = 0x666666;
     public static int fontHeight;
     public static boolean reverseCharacters = false;
@@ -120,6 +121,7 @@ public class TextStyle {
         if (TextStyle.reverseCharacters) {
             str = GBCToolkit.reverseCharacters(str);
         }
+        
         updateGraphics(graphics);
         graphics.setFont(getFont());
         graphics.drawString(str, x, y, anchor);
@@ -138,8 +140,14 @@ public class TextStyle {
             // and related bug: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4684592
             Image buffer = Image.createImage(width, getHeight());
             Graphics g = buffer.getGraphics();
+            
+            g.setColor(backColour);
+            g.fillRect(0, 0, width, getHeight());
             // draw to temp image, first the string
             g.setFont(getFont());
+            updateGraphics(g);
+            
+            
             g.drawString(str, 0, 0, anchor);    
                      
             // System.out.println("[TextStyle.drawstring()] x "+x+" y "+y+" stringwidth "+width+" font height "+getHeight());

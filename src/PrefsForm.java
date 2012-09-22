@@ -175,12 +175,14 @@ public class PrefsForm extends Form implements CommandListener, ItemCommandListe
 
 //					goBible.theme = themeItem.id;
                     goBible.theme = themeChoice.getSelectedIndex();
-
+                    
                     goBible.reverseColours = (reverseColoursChoice.getSelectedIndex() == 0);
 
                     TextStyle.reverseCharacters = (reverseCharactersChoice.getSelectedIndex() == 0);
 
                     TextStyle.redLetter = (redLetterChoice.getSelectedIndex() == 0);
+                    
+                    TextStyle.backColour = GoBible.THEME_BACK_COLOUR[goBible.theme];
 
                     // Go back to the main screen
                     goBible.showMainScreen();

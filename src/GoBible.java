@@ -439,6 +439,7 @@ public class GoBible extends MIDlet implements Runnable
             // TODO: Please discuss this with the designers how to manage
             // these variables (one static GoBible instance?)
             TextStyle.textColour = textColour;
+            TextStyle.backColour = backColour;
             TextStyle.christWordsColour = THEME_CHRIST_COLOUR[theme];
             int red = (((backColour >> 16) & 0xFF) + 2 * ((textColour >> 16) & 0xFF)) / 3,
                     green = (((backColour >> 8) & 0xFF) + 2 * ((textColour >> 8) & 0xFF)) / 3,
