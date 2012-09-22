@@ -94,21 +94,25 @@ public class SelectTranslationList extends List implements CommandListener {
                         // not in the beginning or not in the end
                         if (i != 0 && i < nameChars.length-1) 
                         {                            
-                            // todo: päättely toisinpäin, eli jos nykyinen ei ole upper ja seuraava on....
-                            // if next character is not uppercase, append with space + char
-                            if (Character.isUpperCase(nameChars[i]) && !Character.isUpperCase(nameChars[i+1])) 
-                            {
-                                sb.append(" ");
-                                sb.append(nameChars[i]);
-                            }
-                            // if next character is digit, append with char + space 
-                            else if (Character.isLowerCase(nameChars[i]) && Character.isDigit(nameChars[i+1]))
+                            
+                            // if current character is not uppercase and                          
+                            // if next character is digit, uppercase or bracket, append with char + space 
+                            if (Character.isLowerCase(nameChars[i]) && 
+                                    (Character.isDigit(nameChars[i+1]) ||
+                                    Character.isUpperCase(nameChars[i+1]) ||
+                                    nameChars[i+1] == '(' ||
+                                    nameChars[i+1] == ')'))
                             {   
                                 sb.append(nameChars[i]);
                                 sb.append(" ");
                             }
-                            else {
+                            else {                                
                                 sb.append(nameChars[i]);
+                                
+                                // special case: if current char is closing bracket, append with space
+                                if (nameChars[i] == ')') {
+                                    sb.append(" ");
+                                }
                             }                            
                         }                        
                         else 
