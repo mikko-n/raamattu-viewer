@@ -1,5 +1,6 @@
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.Image;
 
 /**
  * Class to store and manage the text styles. The properties are booleans
@@ -122,18 +123,47 @@ public class TextStyle {
         updateGraphics(graphics);
         graphics.setFont(getFont());
         graphics.drawString(str, x, y, anchor);
+                
         if (fauxBold && isBold()) {
             graphics.drawString(str, x + 1, y, anchor);
         }
         if (fauxItalic && isItalic() && (anchor & Graphics.TOP) != 0) {
-            graphics.setStrokeStyle(Graphics.DOTTED);
+            // fake italics, move upper part of the string one pixel right           
+            
+            int width = stringWidth(str);
+                        
+            // first, create temp image for drawing because copyArea() method 
+            // throws IllegalStateException if the destination of this Graphics customer is the display device.
+            // see discussion: http://www.developer.nokia.com/Community/Discussion/showthread.php?93175-javax.microedition.lcdui.game.GameCanvas-copyArea-IllegalStateException
+            // and related bug: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4684592
+            Image buffer = Image.createImage(width, getHeight());
+            Graphics g = buffer.getGraphics();
+            // draw to temp image, first the string
+            g.setFont(getFont());
+            g.drawString(str, 0, 0, anchor);    
+                     
+            // System.out.println("[TextStyle.drawstring()] x "+x+" y "+y+" stringwidth "+width+" font height "+getHeight());
+            
+            // then copy the 1/3rd upper part of the text one pixel right            
+            g.copyArea(0, 0,
+                    width, getHeight()/3+1,
+                    1, 0, anchor);
+            // copy 2/3 of upper part one pixel right for cleaner output (2-step italics)
+            g.copyArea(0, 0,
+                    width, getHeight()/3*2+1,
+                    1, 0, anchor);
+            
+            // finally, draw temp image to display
+            graphics.drawImage(buffer, x, y, anchor);
+            
             /* TODO: Optimize this code by saving the value of stringWidth() */
-            graphics.drawLine(
-                    x,
-                    y + getFont().getBaselinePosition(),
-                    x + stringWidth(str) * (((anchor & Graphics.RIGHT) != 0)? -1 : 1),
-                    y + getFont().getBaselinePosition()
-                    );
+            
+//            graphics.drawLine(
+//                    x,
+//                    y + getFont().getBaselinePosition(),
+//                    x + stringWidth(str) * (((anchor & Graphics.RIGHT) != 0)? -1 : 1),
+//                    y + getFont().getBaselinePosition()
+//                    );
         }
     }
         /**

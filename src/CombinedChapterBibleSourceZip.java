@@ -87,8 +87,13 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
         
         String bibleLocation = "Bible Data/Index";
         System.out.println("[CombinedChapterBibleSource.const] biblelocation = "+bibleLocation);
-        
-        RandomReadingFile rrf = new RandomReadingFile(BIBLE_DATA);
+        RandomReadingFile rrf;
+        try {
+            rrf = new RandomReadingFile(BIBLE_DATA);
+        }
+        catch (Exception e) {
+            throw new TranslationNotFoundException(GoBible.getString("UI-Translation-Not-Found"));
+        }
         
         zipFile = null;
         
