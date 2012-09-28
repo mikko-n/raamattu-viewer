@@ -1763,6 +1763,10 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                 verseBuffer.insert(verseNumberPosition, bookHeading);
                 verseNumberPosition += bookHeading.length();
             }
+            if (verseBuffer.charAt(verseNumberPosition) == STYLE_SECTION_TITLE) {
+                needChapterHeading = true;
+            }
+            
             // skip all section names e.g. Book I, Book II
             if (needChapterHeading) {
                 while ( true ) {
@@ -1781,8 +1785,10 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                     }
                 }
                 // inject chapter number
-                verseBuffer.insert(verseNumberPosition, chapterHeading);
-                verseNumberPosition += chapterHeading.length();
+                if (ctx.verseIndex == 0) {
+                  verseBuffer.insert(verseNumberPosition, chapterHeading);
+                  verseNumberPosition += chapterHeading.length();
+                }
             }
             // skip all titles
             if (needChapterHeading) {
