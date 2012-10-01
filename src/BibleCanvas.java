@@ -23,6 +23,7 @@
 
 import javax.microedition.lcdui.*;
 import java.util.Vector;
+import javax.microedition.lcdui.game.GameCanvas;
 
 /* TODO: reverseChars
  * Implementation Notes:
@@ -748,6 +749,12 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                                 SearchingCanvas.quickSearch(goBible, goBible.lastSearchString, true);
                             }
                             keyHandled = true;
+                        }
+                        else if (keyCode == GameCanvas.KEY_STAR) {
+                            if (GoBible.USE_MIDP20) {                    
+                                setFullScreenMode(!goBible.fullScreen);
+                                goBible.fullScreen = !goBible.fullScreen;                                
+                            }
                         }
 
 			if (keyHandled)
