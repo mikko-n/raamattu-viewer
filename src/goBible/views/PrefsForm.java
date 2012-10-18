@@ -1,3 +1,5 @@
+package goBible.views;
+
 //
 //  PrefsForm.java
 //  GoBible
@@ -21,9 +23,11 @@
 //	along with this program; if not, write to the Free Software
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
+import goBible.base.GoBible;
+import goBible.common.TextStyle;
 import javax.microedition.lcdui.*;
 
-public class PrefsForm extends Form implements CommandListener, ItemCommandListener {
+public class PrefsForm extends Form implements CommandListener {
 
     private GoBible goBible;
     private ChoiceGroup fontSizeChoice;
@@ -42,19 +46,10 @@ public class PrefsForm extends Form implements CommandListener, ItemCommandListe
         GoBible.getString("UI-Theme-Sunshine")
     };
     private Image[] themeImages;
-//	private ColourItem[] themeItems = new ColourItem[]
-//	{
-//		new ColourItem(0, GoBible.getString("UI-Theme-Paper"), GoBible.THEME_TEXT_COLOUR[0], GoBible.THEME_BACK_COLOUR[0]),
-//		new ColourItem(1, GoBible.getString("UI-Theme-Computer"), GoBible.THEME_TEXT_COLOUR[1], GoBible.THEME_BACK_COLOUR[1]),
-//		new ColourItem(2, GoBible.getString("UI-Theme-Floral"), GoBible.THEME_TEXT_COLOUR[2], GoBible.THEME_BACK_COLOUR[2]),
-//		new ColourItem(3, GoBible.getString("UI-Theme-Natural"), GoBible.THEME_TEXT_COLOUR[3], GoBible.THEME_BACK_COLOUR[3]),
-//		new ColourItem(4, GoBible.getString("UI-Theme-Blue"), GoBible.THEME_TEXT_COLOUR[4], GoBible.THEME_BACK_COLOUR[4]),
-//		new ColourItem(5, GoBible.getString("UI-Theme-Sunshine"), GoBible.THEME_TEXT_COLOUR[5], GoBible.THEME_BACK_COLOUR[5]),
-//	};
-//	private ColourItem themeItem;
+
     private Command saveCommand = new Command(GoBible.getString("UI-Save"), Command.OK, 0);
     private Command cancelCommand = new Command(GoBible.getString("UI-Cancel"), Command.CANCEL, 0);
-//	private Command selectCommand = new Command(GoBible.getString("UI-Select"), Command.ITEM, 0);
+
     // Theme Form
     Form themeForm;
 
@@ -94,31 +89,12 @@ public class PrefsForm extends Form implements CommandListener, ItemCommandListe
             createThemeImage(3), createThemeImage(4), createThemeImage(5)
         };
 
-//        append(new StringItem(GoBible.getString("UI-Theme") + ":", null));
-
         System.err.println("[PrefsForm const] before populating choiceGroup");
         themeChoice = new ChoiceGroup(GoBible.getString("UI-Theme") + ":", Choice.POPUP, themeNames, themeImages);
 
         themeChoice.setSelectedIndex(goBible.theme, true);
 
-//		ColourItem storedThemeItem = themeItems[goBible.theme];
-
-//		themeItem = new ColourItem(storedThemeItem.id, storedThemeItem.text, storedThemeItem.textColour, storedThemeItem.backColour);
-//		themeItem.setDefaultCommand(new Command(GoBible.getString("UI-Change"), Command.ITEM, 1));
-//		themeItem.addCommand(new Command(GoBible.getString("UI-Change"), Command.ITEM, 0));
-
-//		themeItem.setItemCommandListener(this);
         append(themeChoice);
-
-        //		append(themeItem);
-
-        // Setup the commands and listeners for the themes form
-//		for (int i = 0; i < themeItems.length; i++)
-//		{
-////			themeItems[i].addCommand(selectCommand);
-//                        themeItems[i].setDefaultCommand(selectCommand);
-//			themeItems[i].setItemCommandListener(this);
-//		}
 
         fontSizeChoice = new ChoiceGroup(GoBible.getString("UI-Font-Size") + ":", Choice.EXCLUSIVE, new String[]{GoBible.getString("UI-Small"), GoBible.getString("UI-Medium"), GoBible.getString("UI-Large")}, null);
         fontSizeChoice.setFont(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL));
@@ -208,48 +184,5 @@ public class PrefsForm extends Form implements CommandListener, ItemCommandListe
         }
     }
 
-    /**
-     * Called when the user selects the theme to change it or when a new theme
-     * has been selected in the theme form.
-     */
-    public void commandAction(Command command, Item item) {
-//		if (item == themeItem)
-//		{
-//			displayThemeForm();
-//		}
-//		else if (item instanceof ColourItem)
-//		{
-//			// A new theme has been selected so update the themeItem
-//			ColourItem newThemeItem = (ColourItem) item;
-//			themeItem.id = newThemeItem.id;
-//			themeItem.setText(newThemeItem.text);
-//			themeItem.textColour = newThemeItem.textColour;
-//			themeItem.backColour = newThemeItem.backColour;
-//			themeItem.notifyStateChanged();
-//			
-//			// Display the prefs form
-//			goBible.display.setCurrent(this);
-//		}
-    }
-    /**
-     * Display a list of themes for the user to select from.
-     */
-//	private void displayThemeForm()
-//	{
-//		// Display the theme list
-//		
-//		// Create a new form if not already created
-//		// We need to reuse the form if already created because
-//		// Items can't be reused in a different form, an
-//		// IllegalStateException is thrown
-//		if (themeForm == null)
-//		{
-//			themeForm = new Form(GoBible.getString("UI-Themes"), themeItems);
-//			themeForm.addCommand(cancelCommand);
-//			themeForm.setCommandListener(this);
-//		}
-//		
-//		// Display the theme form
-//		goBible.display.setCurrent(themeForm);	
-//	}
+ 
 }

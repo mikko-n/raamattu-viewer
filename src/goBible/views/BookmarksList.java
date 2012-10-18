@@ -1,3 +1,5 @@
+package goBible.views;
+
 //
 //  BookmarksList.java
 //  GoBible
@@ -21,6 +23,8 @@
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+import goBible.base.*;
+import goBible.common.*;
 import java.util.Enumeration;
 import javax.microedition.lcdui.*;
 
@@ -59,7 +63,7 @@ public class BookmarksList extends javax.microedition.lcdui.List implements Comm
 		{
 			BookmarkEntry bookmark = (BookmarkEntry) e.nextElement();
 			
-			append(goBible.bibleSource.getBookName(bookmark.bookIndex) + " " + goBible.bibleSource.getReferenceString(bookmark.bookIndex, bookmark.chapterIndex, bookmark.verseIndex) + " \"" + bookmark.excerpt + "\"", null);
+			append(goBible.bibleSource.getBookName(bookmark.getBookIndex()) + " " + goBible.bibleSource.getReferenceString(bookmark.getBookIndex(), bookmark.getChapterIndex(), bookmark.getVerseIndex()) + " \"" + bookmark.getExcerpt() + "\"", null);
 		}
 		
 		
@@ -96,9 +100,9 @@ public class BookmarksList extends javax.microedition.lcdui.List implements Comm
 					BookmarkEntry bookmark = (BookmarkEntry) goBible.bookmarks.elementAt(selectedIndex);
 
                                         goBible.bibleCanvas.userRequestPassage(
-                                                bookmark.bookIndex & 0xff,
-                                                bookmark.chapterIndex & 0xff,
-                                                bookmark.verseIndex & 0xff);
+                                                bookmark.getBookIndex() & 0xff,
+                                                bookmark.getChapterIndex() & 0xff,
+                                                bookmark.getVerseIndex() & 0xff);
 					goBible.display.setCurrent(goBible.bibleCanvas);
                                         goBible.showMainScreen();
 				}

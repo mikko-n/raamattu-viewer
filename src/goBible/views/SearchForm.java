@@ -1,3 +1,5 @@
+package goBible.views;
+
 //
 //  SearchForm.java
 //  GoBible
@@ -21,6 +23,8 @@
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+import goBible.base.GoBible;
+import goBible.canvas.SearchingCanvas;
 import javax.microedition.lcdui.*;
 
 public class SearchForm extends Form implements CommandListener, ItemCommandListener, ItemStateListener

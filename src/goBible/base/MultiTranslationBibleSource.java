@@ -1,7 +1,11 @@
+package goBible.base;
+
 /**
  * MultiTranslationBibleSource.java
  * @author NIM
  */
+import goBible.common.TranslationNotFoundException;
+import goBible.views.SelectTranslationList;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Enumeration;

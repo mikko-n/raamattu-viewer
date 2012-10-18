@@ -1,7 +1,10 @@
+package goBible.base;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+import goBible.common.GBCToolkit;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 

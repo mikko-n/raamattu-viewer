@@ -1,3 +1,5 @@
+package goBible.common;
+
 //
 //  ColourItem.java
 //  GoBible

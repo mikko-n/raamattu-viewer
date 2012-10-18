@@ -1,3 +1,5 @@
+package goBible.common;
+
 //
 //  BookmarkEntry.java
 //  GoBible
@@ -25,8 +27,10 @@ import java.io.*;
 
 public class BookmarkEntry 
 {
-	int bookIndex, chapterIndex, verseIndex;
-	String excerpt;
+    private int bookIndex;
+    private int chapterIndex;
+    private int verseIndex;
+    private String excerpt;
 	
 	/**
 	 * Create a new bookmark.
@@ -55,9 +59,65 @@ public class BookmarkEntry
 	 */
 	public void write(DataOutputStream output) throws IOException
 	{
-		output.writeByte(bookIndex);
-		output.writeByte(chapterIndex);
-		output.writeByte(verseIndex);
-		output.writeUTF(excerpt);
+		output.writeByte(getBookIndex());
+		output.writeByte(getChapterIndex());
+		output.writeByte(getVerseIndex());
+		output.writeUTF(getExcerpt());
 	}
+
+    /**
+     * @return the bookIndex
+     */
+    public int getBookIndex() {
+        return bookIndex;
+    }
+
+    /**
+     * @return the chapterIndex
+     */
+    public int getChapterIndex() {
+        return chapterIndex;
+    }
+
+    /**
+     * @return the excerpt
+     */
+    public String getExcerpt() {
+        return excerpt;
+    }
+
+    /**
+     * @return the verseIndex
+     */
+    public int getVerseIndex() {
+        return verseIndex;
+    }
+
+    /**
+     * @param bookIndex the bookIndex to set
+     */
+    public void setBookIndex(int bookIndex) {
+        this.bookIndex = bookIndex;
+    }
+
+    /**
+     * @param chapterIndex the chapterIndex to set
+     */
+    public void setChapterIndex(int chapterIndex) {
+        this.chapterIndex = chapterIndex;
+    }
+
+    /**
+     * @param excerpt the excerpt to set
+     */
+    public void setExcerpt(String excerpt) {
+        this.excerpt = excerpt;
+    }
+
+    /**
+     * @param verseIndex the verseIndex to set
+     */
+    public void setVerseIndex(int verseIndex) {
+        this.verseIndex = verseIndex;
+    }
 }

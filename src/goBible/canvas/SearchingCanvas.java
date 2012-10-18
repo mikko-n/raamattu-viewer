@@ -1,3 +1,5 @@
+package goBible.canvas;
+
 //
 //  SearchingCanvas.java
 //  GoBible
@@ -21,6 +23,10 @@
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+import goBible.base.GoBible;
+import goBible.common.SearchOptions;
+import goBible.views.SearchResultsList;
+import goBible.common.GBCToolkit;
 import javax.microedition.lcdui.*;
 
 public class SearchingCanvas extends Canvas implements CommandListener, Runnable
@@ -68,15 +74,15 @@ public class SearchingCanvas extends Canvas implements CommandListener, Runnable
             goBible.searchResults.removeAllElements();
             goBible.lastSearchIndex = 0;	// dlh - have to reset it for the new search
 
-            this.searchFromBookIndex = snapshot.fromBook;
-            this.searchToBookIndex = snapshot.toBook;
-            this.searchString = snapshot.searchString;
+            this.searchFromBookIndex = snapshot.getFromBook();
+            this.searchToBookIndex = snapshot.getToBook();
+            this.searchString = snapshot.getSearchString();
             addCommand(new Command(GoBible.getString("UI-Stop"), Command.STOP, 0));
             setCommandListener(this);
 
-            currentBook = snapshot.currentBook;
-            currentChapter = snapshot.currentChapter;
-            currentVerse = snapshot.currentVerse;
+            currentBook = snapshot.getCurrentBook();
+            currentChapter = snapshot.getCurrentChapter();
+            currentVerse = snapshot.getCurrentVerse();
 
             snapshot.dump();
 
@@ -150,7 +156,7 @@ public class SearchingCanvas extends Canvas implements CommandListener, Runnable
                     this.lastChapter,
                     this.lastVerse
                     );
-            opts.exhausted = exhausted;
+            opts.setExhausted(exhausted);
             return opts;
         }
         /**

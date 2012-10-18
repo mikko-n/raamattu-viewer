@@ -1,3 +1,5 @@
+package goBible.canvas;
+
 //
 //  SuperCanvas.java
 //  GoBible

@@ -1,3 +1,5 @@
+package goBible.common;
+
 /*
  * Copyright © 2011 Nokia Corporation. All rights reserved.
  * Nokia and Nokia Connecting People are registered trademarks of Nokia Corporation.

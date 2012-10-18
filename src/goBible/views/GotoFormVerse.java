@@ -1,3 +1,5 @@
+package goBible.views;
+
 //
 //  GotoFormVerse.java
 //  GoBible
@@ -23,6 +25,8 @@
 //
 
 import javax.microedition.lcdui.*;
+import goBible.base.*;
+import goBible.common.TextStyle;
 
 public class GotoFormVerse extends Form implements ItemCommandListener, CommandListener
 {
@@ -83,7 +87,7 @@ public class GotoFormVerse extends Form implements ItemCommandListener, CommandL
 
     }
 
-    protected void gotoPassage(int bk, int ch, int ve) {
+    public void gotoPassage(int bk, int ch, int ve) {
         bookIndex = bk;
         chapterIndex = ch;    
     }

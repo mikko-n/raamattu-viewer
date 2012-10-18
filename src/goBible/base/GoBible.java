@@ -1,3 +1,5 @@
+package goBible.base;
+
 //
 //  GoBible.java
 //  GoBible
@@ -20,6 +22,14 @@
 //	along with this program; if not, write to the Free Software
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
+import goBible.views.SearchResultsList;
+import goBible.views.HistoryList;
+import goBible.common.SearchOptions;
+import goBible.common.PassageReference;
+import goBible.canvas.BibleCanvas;
+import goBible.common.BookmarkEntry;
+import goBible.common.*;
+import goBible.views.*;
 import java.io.*;
 import java.util.*;
 import javax.microedition.lcdui.*;
@@ -35,7 +45,7 @@ public class GoBible extends MIDlet implements Runnable
     
     public final static boolean ZIP_COMPLIANT = true;
 
-    public final static String UI_PROPERTIES_FILE_NAME = "/ui.properties";
+    public final static String UI_PROPERTIES_FILE_NAME = "/goBible/common/ui.properties";
     public final static String GBCoreVer = "2.4.99";	// the version of this Core application
 
     public final static int FONT_SIZE_SMALL = 0;
@@ -121,7 +131,7 @@ public class GoBible extends MIDlet implements Runnable
     //private SplashScreen splashScreen;
     public BibleCanvas bibleCanvas;
     //private GotoForm gotoForm;
-    private PrefsForm prefsForm;
+//    private PrefsForm prefsForm;
 
     private boolean firstRun = true;
     
@@ -161,12 +171,12 @@ public class GoBible extends MIDlet implements Runnable
     public boolean searchCanSpanMultipleVerses = false;	// true for old search behavior
 
     // Search results
-    Vector searchResults = new Vector();
-    SearchOptions searchSnapshot = null;
+    public Vector searchResults = new Vector();
+    public SearchOptions searchSnapshot = null;
     public int lastSearchIndex = 0;
 
     // Bookmarks
-    Vector bookmarks = new Vector();
+    public Vector bookmarks = new Vector();
 
     // Key Settings
     // Defaults are given here.
@@ -425,16 +435,16 @@ public class GoBible extends MIDlet implements Runnable
                     int temp = textColour;
                     textColour = backColour;
                     backColour = temp;
-                    bibleCanvas.highlightColour = backColour;
+                    bibleCanvas.setHighlightColour(backColour);
             }
             else
             {
-                    bibleCanvas.highlightColour = THEME_HIGHLIGHT_COLOUR[theme];
+                    bibleCanvas.setHighlightColour(THEME_HIGHLIGHT_COLOUR[theme]);
             }
 
-            bibleCanvas.textColour = textColour;
-            bibleCanvas.backColour = backColour;
-            bibleCanvas.christWordsColour = THEME_CHRIST_COLOUR[theme];
+            bibleCanvas.setTextColour(textColour);
+            bibleCanvas.setBackColour(backColour);
+            bibleCanvas.setChristWordsColour(THEME_CHRIST_COLOUR[theme]);
 
             // TODO: Please discuss this with the designers how to manage
             // these variables (one static GoBible instance?)
@@ -470,13 +480,9 @@ public class GoBible extends MIDlet implements Runnable
                 {
                         // Create a new BookmarkEntry
                         BookmarkEntry bookmark = new BookmarkEntry(
-                                ref.bookIndex,
-                                ref.chapterIndex,
-                                ref.verseIndex,
+                                ref.getBookIndex(), ref.getChapterIndex(), ref.getVerseIndex(),
                                 getExcerpt(
-                                        ref.bookIndex,
-                                        ref.chapterIndex,
-                                        ref.verseIndex));
+                                        ref.getBookIndex(), ref.getChapterIndex(), ref.getVerseIndex()));
                         
                         // Insert bookmark at the beginning of the bookmarks vector
                         bookmarks.insertElementAt(bookmark, 0);

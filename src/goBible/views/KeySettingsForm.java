@@ -1,3 +1,5 @@
+package goBible.views;
+
 //
 //  PrefsForm.java
 //  GoBible
@@ -20,6 +22,7 @@
 //	along with this program; if not, write to the Free Software
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
+import goBible.base.GoBible;
 import javax.microedition.lcdui.*;
 
 public class KeySettingsForm extends Form implements CommandListener, ItemCommandListener
@@ -62,7 +65,7 @@ public class KeySettingsForm extends Form implements CommandListener, ItemComman
 
     private GoBible goBible;
 
-    private ColourItem themeItem;
+//    private ColourItem themeItem;
 
     private Command saveCommand = new Command(GoBible.getString("UI-Save"), Command.OK, 0);
     private Command assignCommand = new Command(GoBible.getString("UI-Assign-Key"), Command.ITEM, 0);

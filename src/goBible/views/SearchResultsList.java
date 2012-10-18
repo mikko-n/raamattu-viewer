@@ -1,3 +1,5 @@
+package goBible.views;
+
 //
 //  SearchResultsList.java
 //  GoBible
@@ -22,6 +24,9 @@
 //
 
 
+import goBible.base.GoBible;
+import goBible.canvas.SearchingCanvas;
+import goBible.common.SearchOptions;
 import java.util.Enumeration;
 import java.util.Vector;
 import javax.microedition.lcdui.Choice;
@@ -83,7 +88,7 @@ public class SearchResultsList extends javax.microedition.lcdui.List implements 
                 }
         }
         addCommand(new Command(GoBible.getString("UI-Cancel"), Command.CANCEL, 0));
-        if (searchSnapshot != null && searchSnapshot.exhausted == false) {
+        if (searchSnapshot != null && searchSnapshot.isExhausted() == false) {
             addCommand(new Command(GoBible.getString("UI-Search-More"), Command.SCREEN, 0));
         }
 

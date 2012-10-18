@@ -1,3 +1,5 @@
+package goBible.views;
+
 //
 //  GotoFormBook.java
 //  GoBible
@@ -22,6 +24,8 @@
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+import goBible.base.GoBible;
+import goBible.common.TextStyle;
 import javax.microedition.lcdui.*;
 
 public class GotoFormBook extends Form implements ItemCommandListener, CommandListener

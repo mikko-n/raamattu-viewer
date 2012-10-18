@@ -1,3 +1,5 @@
+package goBible.views;
+
 //
 //  GotoForm.java
 //  GoBible
@@ -21,6 +23,7 @@
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+import goBible.base.GoBible;
 import javax.microedition.lcdui.*;
 
 public class GotoForm extends Form implements CommandListener

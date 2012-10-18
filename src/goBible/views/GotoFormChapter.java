@@ -1,3 +1,5 @@
+package goBible.views;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -31,6 +33,8 @@
  */
 
 import javax.microedition.lcdui.*;
+import goBible.base.*;
+import goBible.common.TextStyle;
 
 public class GotoFormChapter extends Form implements ItemCommandListener, CommandListener
 {
@@ -89,7 +93,7 @@ public class GotoFormChapter extends Form implements ItemCommandListener, Comman
                 
 	}
         
-        protected void gotoPassage(int bk, int ch, int ve) {
+        public void gotoPassage(int bk, int ch, int ve) {
             bookIndex = bk;        
         }
 	

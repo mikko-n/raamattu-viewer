@@ -1,3 +1,5 @@
+package goBible.base;
+
 //
 //  CombinedChapterBibleSource.java
 //  GoBible
@@ -21,6 +23,8 @@
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+import goBible.common.TranslationNotFoundException;
+import goBible.common.GBCToolkit;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
