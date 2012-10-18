@@ -34,11 +34,11 @@ Implementation without writing capabilities of `RandomAccessFile` in Java Mobile
 
 Installation
 ------------
-# From sources
+### From sources
 1. Clone, compile, install
 2. Continue from pre-compiled instructions step 2
 
-# Pre-compiled binaries
+### Pre-compiled binaries
 1. Download viewer binaries from my public [Google Docs][gDocs] folder.
 2. Extract reader JAD/JAR-files from Raamattu_viewer.zip and install to phone (via BlueTooth or data cable)
 3. Download translations from [same place][gDocs]
@@ -49,23 +49,23 @@ All translations provided are Public Domain or licenced to allow free distributi
 
 Known issues and future development plans
 -----------------------------------------
-# Installation ease-up
+### Installation ease-up
 *   Separate Bluetooth-app to send .jar/.jad files on Nokia phones (Nokia has disabled this feature)
 *   Translation downloads from app
 *   Custom translation folder instead of current hard-coded one
 *   Download from app stores?
-# Usage ease-up and improvements
+### Usage ease-up and improvements
 *   Navigation clarification
 *   possibility to show/hide footnotes, comments and cross-references
 *   possibility to compare translations (show a single verse from many translations)
 *   cross-references to direct links
 *   adding Biblical maps
 *   bugfixes
-# Known bugs
+### Known bugs
 *   changing translation with larger canon to one with fewer books
     - changing for example OT+NT translation to translation with only OT and current book is outside books contained in new translation causes ArrayOutOfBoundsException
 *   exiting "select translation" screen without selecting translation causes exception (first time usage issue)
-# Others
+### Others
 *   New name for app
 
 [1]: http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt 
