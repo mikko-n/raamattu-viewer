@@ -21,6 +21,8 @@
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.microedition.lcdui.*;
 import java.util.Vector;
 import javax.microedition.lcdui.game.GameCanvas;
@@ -171,6 +173,9 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
         // because keypad devices look better (no flickering)
         // However the trade-off is slower response time.
         public boolean needCache = false;
+        
+        private Timer timer;
+        private TimerTask scrollingTimerTask;
 
         private PassageReference currentPassage;
 	
@@ -188,6 +193,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 	{
             this.goBible = goBible;
             this.currentPassage = new PassageReference(goBible);
+            timer = new Timer();
 	}
 
         /**
@@ -293,7 +299,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 	 */
 	protected void pointerDragged(int x, int y) {
             super.pointerDragged(x, y);
-
+            
             needCache = true;
             double diffX = Math.abs(x - firstX);
             double diffY = Math.abs(y - firstY);
@@ -657,8 +663,29 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 		}
 	}
        
+        /**
+         * 
+         * @param dx
+         * @param direction true = down, false = up
+         */
+        private void scrollPage(int dx) {            
+            
+            pointerDragged(width/2, dx);
+            
+            if (dx >= height-1 || dx <= gotoRectangle.height+1) {
+                stopScrolling();
+                pointerReleased(width/2, dx);
+            }
+        } 
+        
+        private synchronized void stopScrolling() {
+        if (scrollingTimerTask != null) {
+            scrollingTimerTask.cancel();
+            scrollingTimerTask = null;
+        }
+    }
               
-	public void keyPressed(int keyCode)
+	public void keyPressed(final int keyCode)
 	{
 		//this.keyCode = keyCode;
 		boolean keyHandled = false;
@@ -670,16 +697,41 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 		if (mode == MODE_VIEWING)
 		{
                     synchronized (currentPassage) {
-                        if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_VERSE])
-                        {                                 
-                            currentPassage.previousVerse();
+                        if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_VERSE] ||
+                            keyCode == goBible.keySettings[KeySettingsForm.ACTION_NEXT_VERSE])
+                        {                     
+                           if (scrollingTimerTask == null) {
+                               
+                               
+                               pointerPressed(width/2, height/2);
+                               
+                               
+                               scrollingTimerTask = new TimerTask() {
+                                   private int dx = firstY;                                   
+                                   private int kc= keyCode;
+                                   public void run() {    
+                                      if (kc == goBible.keySettings[KeySettingsForm.ACTION_NEXT_VERSE]) {
+                                          dx -= height/2/8;
+                                          scrollPage(dx); 
+                                      }
+                                      else {
+                                          dx += height/2/10;
+                                          scrollPage(dx); 
+                                      }
+                                      
+                                   }
+                                   
+                               };
+                               timer.schedule(scrollingTimerTask, 0, 1000 / 120);
+                           }
+//                            currentPassage.previousVerse();
                             keyHandled = true;
                         }
-                        else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_NEXT_VERSE])
-                        {
-                            currentPassage.nextVerse();
-                            keyHandled = true;
-                        }
+//                        else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_NEXT_VERSE])
+//                        {
+//                            currentPassage.nextVerse();
+//                            keyHandled = true;
+//                        }
                         else if(keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_CHAPTER])
                         {
                             if (currentPassage.verseIndex != 0 || currentPassage.lineOffset != 0) {
