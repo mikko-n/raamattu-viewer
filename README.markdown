@@ -54,6 +54,7 @@ Known issues and future development plans
 *   Translation downloads from app
 *   Custom translation folder instead of current hard-coded one
 *   Download from app stores?
+
 ### Usage ease-up and improvements
 *   Navigation clarification
 *   possibility to show/hide footnotes, comments and cross-references
@@ -61,10 +62,12 @@ Known issues and future development plans
 *   cross-references to direct links
 *   adding Biblical maps
 *   bugfixes
+
 ### Known bugs
 *   changing translation with larger canon to one with fewer books
     - changing for example OT+NT translation to translation with only OT and current book is outside books contained in new translation causes ArrayOutOfBoundsException
 *   exiting "select translation" screen without selecting translation causes exception (first time usage issue)
+
 ### Others
 *   New name for app
 
