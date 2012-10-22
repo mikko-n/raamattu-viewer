@@ -63,8 +63,8 @@ public class FileBrowser extends List implements CommandListener {
 
     private GoBible goBible;
     // Commands    
-    public static final Command SELECT_FILE_COMMAND = new Command("Select", Command.OK, 1);
-    public static final Command CANCEL_COMMAND = new Command("Cancel", Command.CANCEL, 0);
+    public static final Command SELECT_FILE_COMMAND = new Command(GoBible.getString("UI-Select"), Command.OK, 1);
+    public static final Command CANCEL_COMMAND = new Command(GoBible.getString("UI-Cancel"), Command.CANCEL, 0);
     private String currDirName;
     private String currFile;
     private Image dirIcon;
