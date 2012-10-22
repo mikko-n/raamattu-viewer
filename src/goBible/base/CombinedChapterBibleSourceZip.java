@@ -22,7 +22,6 @@ package goBible.base;
 //	along with this program; if not, write to the Free Software
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-
 import goBible.common.TranslationNotFoundException;
 import goBible.common.GBCToolkit;
 import java.io.DataInputStream;
@@ -37,7 +36,11 @@ import org.albite.io.RandomReadingFile;
 public class CombinedChapterBibleSourceZip extends BibleSource {
 
     private String BIBLE_DATA = GoBible.BIBLE_DATA_ROOT + "FinPR92";
-    private GoBible goBible = null;
+    // data root location inside zip file
+    private String DATAFILES_ROOT = "Bible Data/";
+    String bibleLocation = DATAFILES_ROOT + "Index";
+    private GoBible goBible;
+    
     // Current chapter loaded
     private int currentBookIndex = -1;
     private int currentFileIndex = -1;
@@ -70,7 +73,6 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
     // lookup data
     private short bookLookups[] = {};
     private int verseLookups[] = {};
-    
     // file which holds the bible data
     private ZipFile zipFile;
 
@@ -82,35 +84,30 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
     public CombinedChapterBibleSourceZip(GoBible goBible, String translationRoot) throws IOException, TranslationNotFoundException {
         super(goBible);
 
-        if (translationRoot == "" || translationRoot == null) {
-            BIBLE_DATA = GoBible.BIBLE_DATA_ROOT + "FinPR92";
-        } else {
-            BIBLE_DATA = GoBible.BIBLE_DATA_ROOT + translationRoot;
-        }
-        System.out.println("[CombinedChapterBibleSource.const] BIBLE_DATA = "+BIBLE_DATA);
-        
-        String bibleLocation = "Bible Data/Index";
-        System.out.println("[CombinedChapterBibleSource.const] biblelocation = "+bibleLocation);
+        BIBLE_DATA = "file://" + goBible.bookUrl + goBible.getTranslation();
+
+        System.out.println("[CombinedChapterBibleSource.const] BIBLE_DATA = " + BIBLE_DATA);
+        System.out.println("[CombinedChapterBibleSource.const] biblelocation = " + bibleLocation);
+
         RandomReadingFile rrf;
         try {
             rrf = new RandomReadingFile(BIBLE_DATA);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new TranslationNotFoundException(GoBible.getString("UI-Translation-Not-Found"));
         }
-        
+
         zipFile = null;
-        
+
         try {
-            zipFile = new ZipFile(rrf);            
+            zipFile = new ZipFile(rrf);
         } catch (IOException ioEx) {
             throw new IOException("Err opening conn: " + ioEx.getMessage() + ", filepath: " + bibleLocation);
         }
-        
-        ZipEntry ze = zipFile.getEntry(bibleLocation);        
-        
+
+        ZipEntry ze = zipFile.getEntry(bibleLocation);
+
         boolean error = false;
-        
+
         // Read in the main index
         DataInputStream input = null;
         try {
@@ -118,9 +115,9 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
         } catch (IOException ioEx) {
 
             if (input == null) {
-                throw new TranslationNotFoundException(GoBible.getString("UI-Translation-Not-Found"));                
+                throw new TranslationNotFoundException(GoBible.getString("UI-Translation-Not-Found"));
             }
-            throw new IOException("Err opening stream: " + ioEx.getMessage()                
+            throw new IOException("Err opening stream: " + ioEx.getMessage()
                     + ", url: " + rrf.getURL());
         }
 
@@ -174,11 +171,11 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
             input.close();
 
             // Read in the reference lookup map
-            String referenceLocation = "Bible Data/Reference Lookup";
-            
+            String referenceLocation = DATAFILES_ROOT + "Reference Lookup";
+
             ze = null;
             ze = zipFile.getEntry(referenceLocation);
-            
+
             InputStream refLookup = zipFile.getInputStream(ze);
 
             if (refLookup != null) {
@@ -186,6 +183,7 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
                 readReference(input);
             }
         }
+
     }
 
     private void readReference(DataInputStream dis) {
@@ -370,21 +368,21 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
 
         return verseData;
     }
-    
+
     public char[] getVerse(int bookIndex, int chapterIndex, int verseNumber) throws IOException {
         getChapter(bookIndex, chapterIndex);
-        
+
         int verseIndex = getVerseIndexFromNumber(bookIndex, chapterIndex, verseNumber);
-                       
+
         // Load some info for requested verse
         int verseSize = 50; //getVerseIndexFromNumber(bookIndex, chapterIndex, verseNumber+1) - verseIndex;
-        System.out.println("Verse size: "+verseSize+", verse index: "+verseIndex);
-        
+        System.out.println("Verse size: " + verseSize + ", verse index: " + verseIndex);
+
         char[] verse = new char[verseSize];
-        
+
         // Copy requested verse data out of verseData, change chapter if needed
         System.arraycopy(verseData, verseIndex, verse, 0, verseSize);
-        System.err.println(verse);        
+        System.err.println(verse);
         return verse;
     }
 
@@ -404,20 +402,20 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
                 if (currentBookIndex != bookIndex) {
                     loadBookIndex(bookIndex);
                 }
-                System.err.println("[CombinedChapterBibleSource.loadChapter("+bookIndex+", "+chapterIndex+")");
+                System.err.println("[CombinedChapterBibleSource.loadChapter(" + bookIndex + ", " + chapterIndex + ")");
                 currentFileIndex = combinedChapterIndex[bookIndex][chapterIndex << 2];
 
                 // Load the chapter as it will be different if either the chapter or book changed
                 //start = System.currentTimeMillis();
 //                FileConnection con = (FileConnection) Connector.open(FILE_SEPARATOR)
 
-                String currentString = "Bible Data/"+shortBookNames[bookIndex] + "/" + shortBookNames[bookIndex] + " " + currentFileIndex;
+                String currentString = DATAFILES_ROOT + shortBookNames[bookIndex] + "/" + shortBookNames[bookIndex] + " " + currentFileIndex;
 
                 ZipEntry ze = zipFile.getEntry(currentString);
 
                 // Read in the main index
                 DataInputStream input = new DataInputStream(zipFile.getInputStream(ze));
-                
+
                 int length = input.readInt();
 
                 byte[] byteArray = new byte[length];
@@ -425,7 +423,7 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
                 input.readFully(byteArray, 0, length);
 
                 input.close();
-                
+
                 // Do our own UTF-8 conversion
                 fileData = new char[length];
 
@@ -518,9 +516,9 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
 
         currentBookIndex = bookIndex;
 
-        String booksIndex = "Bible Data/"+shortBookNames[bookIndex] + "/Index";
+        String booksIndex = DATAFILES_ROOT + shortBookNames[bookIndex] + "/Index";
         ZipEntry ze = zipFile.getEntry(booksIndex);
-        
+
         // Read in the book index
         DataInputStream input = new DataInputStream(zipFile.getInputStream(ze));
 

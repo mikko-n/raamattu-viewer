@@ -132,16 +132,17 @@ public class GoBible extends MIDlet implements Runnable
     public BibleCanvas bibleCanvas;
     //private GotoForm gotoForm;
 //    private PrefsForm prefsForm;
+    FileBrowser fileBrowser;
 
     private boolean firstRun = true;
     
     public final static String FILE_SEPARATOR =
             (System.getProperty("file.separator") != null) ? System.getProperty("file.separator") : "/";
     
-    public final static String BIBLE_DATA_ROOT = 
-            (System.getProperty("fileconn.dir.memorycard") != null) ? System.getProperty("fileconn.dir.memorycard")+"Raamatut"+FILE_SEPARATOR :
-            "file:"+FILE_SEPARATOR+FILE_SEPARATOR+"CFROOT"+FILE_SEPARATOR+"Raamatut"+FILE_SEPARATOR;
-    
+    public final static String BIBLE_DATA_ROOT = "/";
+//            (System.getProperty("fileconn.dir.memorycard") != null) ? System.getProperty("fileconn.dir.memorycard")+"Raamatut"+FILE_SEPARATOR :
+//            "file:"+FILE_SEPARATOR+FILE_SEPARATOR+"CFROOT"+FILE_SEPARATOR+"Raamatut"+FILE_SEPARATOR;
+//    
     public int currentBookIndex = 0;
     public int currentChapterIndex = 0;
     public int currentVerseIndex = 0;
@@ -162,7 +163,9 @@ public class GoBible extends MIDlet implements Runnable
     public char[] verseData;
 
     public BibleSource bibleSource;
-    private String translation = "FinPR92";
+    private String translation = "Raamattu1992.zip";
+    public final static String[] SUPPORTED_FILE_EXTENSIONS = new String[]{".zip"};
+    public String bookUrl ="E:/Raamatut/";
     
     // Search preferences
     public String lastSearchString = "";
@@ -256,7 +259,7 @@ public class GoBible extends MIDlet implements Runnable
 
                 // Load the data in another thread allowing the splash screen to be seen
                 Thread data = new Thread(this);                
-                data.start();
+                data.start();                
             }
             catch (Throwable e)
             {
@@ -353,7 +356,7 @@ public class GoBible extends MIDlet implements Runnable
                         GoBible.getString("UI-Translation-Not-Found"), null,
                         AlertType.ERROR);
             a.setTimeout(2000);
-            display.setCurrent(a, new SelectTranslationList(this));
+            display.setCurrent(a, getFileBrowser());
                 
         }
         catch (Exception e) {
@@ -586,37 +589,79 @@ public class GoBible extends MIDlet implements Runnable
     
     public void showChangeTranslationScreen() 
     {
-            SelectTranslationList selectTranslationList = new SelectTranslationList(this);
-            display.setCurrent(selectTranslationList);
+        
+//            SelectTranslationList selectTranslationList = new SelectTranslationList(this);
+//            display.setCurrent(selectTranslationList);
+     
+        
+        display.setCurrent(getFileBrowser());
+    }
+    
+     public FileBrowser getFileBrowser() {
+        if (fileBrowser == null) {
+            fileBrowser = new FileBrowser(this);
+            fileBrowser.setTitle(GoBible.getString("UI-Change-Translation"));        
+//            fileBrowser.setFilter("");
+            fileBrowser.setCommandListener(fileBrowser);
+            fileBrowser.addCommand(FileBrowser.SELECT_FILE_COMMAND);
+            fileBrowser.addCommand(FileBrowser.CANCEL_COMMAND);
+            // write post-init user code here
+            fileBrowser.setDir(getCurrentBookFolder());
+        }        
+        return fileBrowser;
+    }
+    /**
+     * Returns current translation file folder 
+     * (does not include filename, see <code>getTranslation()</code>)
+     * @return Current translation folder
+     */
+    public String getCurrentBookFolder() {
+        if (bookUrl == null) {
+            return null;
+        }
+        return bookUrl;
     }
 
+    /**
+     * Returns current translations filename
+     * (does not include folder name, see <code>getCurrentBookFolder()</code>)
+     * @return Translation file name
+     */
     public String getTranslation() {
         return this.translation;
     }
     
-    public void setTranslation(String translationFolder) {
+    /**
+     * Sets the current translation file name
+     * see also <code>translationItemStringToFilename(String displayName)</code>
+     * @param translationFile 
+     */
+    public void setTranslation(String translationFile) {
         if (ZIP_COMPLIANT) {
-            
-            char[] nameChars = translationFolder.toCharArray();
-            char[] fileNameChars = new char[nameChars.length];
-
-            int j = 0;
-
-            // clean white spaces
-            for (int i = 0; i < nameChars.length; i++) 
-            {
-                if (nameChars[i] != ' ') {
-                    fileNameChars[j] = nameChars[i];
-                    j++;
-                }
-            }
-
-            this.translation = new String(fileNameChars, 0, j) + ".zip";
-
-//            this.translation = translationFolder+".zip";
+            this.translation = translationItemStringToFilename(translationFile);
         } else {
-            this.translation = translationFolder;
+            this.translation = translationFile;
         }
+    }
+
+    /**
+     * Converts translation item string to corresponding file name
+     * @param displayName item's display name
+     * @return 
+     */
+    public String translationItemStringToFilename(String displayName) {
+        char[] nameChars = displayName.toCharArray();
+        char[] fileNameChars = new char[nameChars.length];
+        int j = 0;
+        // clean white spaces
+        for (int i = 0; i < nameChars.length; i++) 
+        {
+            if (nameChars[i] != ' ') {
+                fileNameChars[j] = nameChars[i];
+                j++;
+            }
+        }
+        return new String(fileNameChars, 0, j) + ".zip";
     }
     
     public void showAboutAlert()
@@ -1161,7 +1206,10 @@ public class GoBible extends MIDlet implements Runnable
                 // Read in reverse colours
                 TextStyle.redLetter = input.readBoolean();
 
-                // Read in translation
+                // Read in translation folder
+                bookUrl = input.readUTF();
+                
+                // read in translation file
                 translation = input.readUTF();
                 
                 input.close();
@@ -1224,6 +1272,8 @@ public class GoBible extends MIDlet implements Runnable
                     output.writeBoolean(bibleCanvas.needCache);
 
                     output.writeBoolean(TextStyle.redLetter);
+                    
+                    output.writeUTF(bookUrl);
                     
                     output.writeUTF(translation);
                     

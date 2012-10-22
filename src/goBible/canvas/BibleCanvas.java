@@ -116,14 +116,14 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             searchCommand,
             searchNextCommand, /* ExtendedUI */
             searchResultsCommand,
+            changeTranslationCommand,
             addBookmarkCommand,
             bookmarksCommand,
             historyCommand,
             sendSMSCommand, /* MIDP2.0 */
             //sendMMSCommand, /* disabled */
             prefsCommand,
-            keySettingsCommand, /*Extended UI */
-            changeTranslationCommand,
+            keySettingsCommand, /*Extended UI */            
             aboutCommand,
             exitCommand
         };
@@ -184,6 +184,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
         
         private Timer timer;
         private TimerTask scrollingTimerTask;
+        private float animationProgress = 0F;
 
         private PassageReference currentPassage;
 	
@@ -227,22 +228,22 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             this.requestPassage(bookIndex, chapterIndex, verseIndex, 0);
         }
         public void requestPassage(int bookIndex, int chapterIndex, int verseIndex, int lineOffset) {
-            synchronized (currentPassage) { // Because the cache thread can update its reference
-                currentPassage.setBookIndex(bookIndex);
-                currentPassage.setChapterIndex(chapterIndex);
-                currentPassage.setVerseIndex(verseIndex);
-                currentPassage.setLineOffset(lineOffset);
+            synchronized (getCurrentPassage()) { // Because the cache thread can update its reference
+                getCurrentPassage().setBookIndex(bookIndex);
+                getCurrentPassage().setChapterIndex(chapterIndex);
+                getCurrentPassage().setVerseIndex(verseIndex);
+                getCurrentPassage().setLineOffset(lineOffset);
             }
             repaint();
         }
         public int currentBook() {
-            return currentPassage.getBookIndex();
+            return getCurrentPassage().getBookIndex();
         }
         public int currentChapter() {
-            return currentPassage.getChapterIndex();
+            return getCurrentPassage().getChapterIndex();
         }
         public int currentVerse() {
-            return currentPassage.getVerseIndex();
+            return getCurrentPassage().getVerseIndex();
         }
 
 	// the stylus, touch screen, or trackball was pressed
@@ -329,11 +330,11 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                      */
                     if ( (x > firstX) ^ (align == ALIGN_LEFT)) {
                         /* TH: requestNextChapter() */
-                        currentPassage.nextChapter();
+                        getCurrentPassage().nextChapter();
                     }
                     else {
                         /* TH: requestPreviousChapter() */
-                        currentPassage.previousChapter();
+                        getCurrentPassage().previousChapter();
                     }
                     
                     suspendEvents=true;
@@ -380,7 +381,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                     int linesToScroll = (savedY + delY) / TextStyle.fontHeight;
                     pixelOffset = (savedY + delY) % TextStyle.fontHeight;
 
-                    currentPassage.setLineOffset(currentPassage.getLineOffset() - linesToScroll);
+                    getCurrentPassage().setLineOffset(getCurrentPassage().getLineOffset() - linesToScroll);
 
                     savedY = savedY + delY - (linesToScroll * TextStyle.fontHeight);
 
@@ -634,7 +635,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                             }
                             else if (command == addBookmarkCommand)
                             {
-                                    goBible.addBookmark(currentPassage);
+                                    goBible.addBookmark(getCurrentPassage());
                             }
                             else if (command == bookmarksCommand)
                             {
@@ -680,7 +681,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             
             pointerDragged(width/2, dx);
             
-            if (dx >= height-1 || dx <= gotoRectangle.height+1) {
+            if (dx >= height-1 || dx <= gotoRectangle.height+1 || animationProgress >= 1F) {
                 stopScrolling();
                 pointerReleased(width/2, dx);
             }
@@ -690,9 +691,27 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
         if (scrollingTimerTask != null) {
             scrollingTimerTask.cancel();
             scrollingTimerTask = null;
+            animationProgress = 0F;
         }
     }
-              
+        
+        private int calculateDx(boolean up) {
+            animationProgress += 0.1F;
+            int p0=0;
+            int p1=5;
+            int p2 = height/8;
+            if (!up) {
+                p2= height/10;
+            }
+            
+            float t = animationProgress;
+            int palautus = (int)(((1-t)*(1-t)*t*p1)+t*((1-t)*p1+t*p2));
+//            int palautus = (int)((1-animationProgress)*((1-animationProgress)*animationProgress*(height/2/8))+animationProgress*((1-animationProgress)*(height/2/8)+(animationProgress*height/2)));
+            System.out.println("[BibleCanvas.calculateDx] palautus = "+palautus+" (static rate was "+height/2/8+")");
+            return palautus;
+//            return height/2/8;
+        }
+        
 	public void keyPressed(final int keyCode)
 	{
 		//this.keyCode = keyCode;
@@ -704,25 +723,26 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 
 		if (mode == MODE_VIEWING)
 		{
-                    synchronized (currentPassage) {
+                    synchronized (getCurrentPassage()) {
                         if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_VERSE] ||
                             keyCode == goBible.keySettings[KeySettingsForm.ACTION_NEXT_VERSE])
                         {                     
-                           if (scrollingTimerTask == null) {
+                           if (scrollingTimerTask == null) {                               
                                
-                               
-                               pointerPressed(width/2, height/2);
-                               
+                               pointerPressed(width/2, height/2);                               
                                
                                scrollingTimerTask = new TimerTask() {
                                    private int dx = firstY;                                   
                                    private int kc= keyCode;
                                    public void run() {    
                                       if (kc == goBible.keySettings[KeySettingsForm.ACTION_NEXT_VERSE]) {
-                                          dx -= height/2/8;
+//                                          dx -= calculateDx(true);
+                                          dx -= height/2/8;                                          
+//                                          System.out.println("[BibleCanvas.keyPressed] last drawn line offset="+getLastDrawnPosition().getLineOffset());
                                           scrollPage(dx); 
                                       }
                                       else {
+//                                          dx += calculateDx(false);
                                           dx += height/2/10;
                                           scrollPage(dx); 
                                       }
@@ -742,58 +762,58 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 //                        }
                         else if(keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_CHAPTER])
                         {
-                            if (currentPassage.getVerseIndex() != 0 || currentPassage.getLineOffset() != 0) {
-                                currentPassage.setVerseIndex(0);
-                                currentPassage.setLineOffset(0);
+                            if (getCurrentPassage().getVerseIndex() != 0 || getCurrentPassage().getLineOffset() != 0) {
+                                getCurrentPassage().setVerseIndex(0);
+                                getCurrentPassage().setLineOffset(0);
                             }
                             else {
-                                currentPassage.previousChapter();
+                                getCurrentPassage().previousChapter();
                             }
                             keyHandled = true;
                         }
                         else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_NEXT_CHAPTER])
                         {
-                            currentPassage.nextChapter();
+                            getCurrentPassage().nextChapter();
                             keyHandled = true;
                         }
                         else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_BOOK])
                         {
-                            currentPassage.previousBook();
+                            getCurrentPassage().previousBook();
                             keyHandled = true;
                         }
                         else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_NEXT_BOOK])
                         {
-                            currentPassage.nextBook();
+                            getCurrentPassage().nextBook();
                             keyHandled = true;
                         }
                         else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_SCREEN])
                         {
-                            currentPassage.setLineOffset(currentPassage.getLineOffset() - linesPerScreen);
+                            getCurrentPassage().setLineOffset(getCurrentPassage().getLineOffset() - linesPerScreen);
                             keyHandled = true;
                         }
                         else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_NEXT_SCREEN])
                         {
-                            currentPassage.setLineOffset(currentPassage.getLineOffset() + linesPerScreen);
+                            getCurrentPassage().setLineOffset(getCurrentPassage().getLineOffset() + linesPerScreen);
                             keyHandled = true;
                         }
                         else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_3_LINES])
                         {
-                            currentPassage.setLineOffset(currentPassage.getLineOffset() - 3);
+                            getCurrentPassage().setLineOffset(getCurrentPassage().getLineOffset() - 3);
                             keyHandled = true;
                         }
                         else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_NEXT_3_LINES])
                         {
-                            currentPassage.setLineOffset(currentPassage.getLineOffset() + 3);
+                            getCurrentPassage().setLineOffset(getCurrentPassage().getLineOffset() + 3);
                             keyHandled = true;
                         }
                         else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_1_LINE])
                         {
-                            currentPassage.setLineOffset(currentPassage.getLineOffset() - 1);
+                            getCurrentPassage().setLineOffset(getCurrentPassage().getLineOffset() - 1);
                             keyHandled = true;
                         }
                         else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_NEXT_1_LINE])
                         {
-                            currentPassage.setLineOffset(currentPassage.getLineOffset() + 1);
+                            getCurrentPassage().setLineOffset(getCurrentPassage().getLineOffset() + 1);
                             keyHandled = true;
                         }
 /*                        else if (keyCode == goBible.keySettings[KeySettingsForm.ACTION_PREV_SEARCH_RESULT])
@@ -827,12 +847,12 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 
 				if (gameAction == UP)
 				{
-                                    currentPassage.setLineOffset(currentPassage.getLineOffset() - linesPerScreen);
+                                    getCurrentPassage().setLineOffset(getCurrentPassage().getLineOffset() - linesPerScreen);
                                     repaint();
 				}
 				else if (gameAction == DOWN)
 				{
-                                    currentPassage.setLineOffset(currentPassage.getLineOffset() + linesPerScreen);
+                                    getCurrentPassage().setLineOffset(getCurrentPassage().getLineOffset() + linesPerScreen);
                                     repaint();
 				}
 				else if (gameAction == FIRE || keyCode == goBible.keySettings[KeySettingsForm.ACTION_GOTO])
@@ -1133,11 +1153,11 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             {
                 mode = MODE_GOTO;
 
-                synchronized (currentPassage) {
-                    selection[SELECTION_BOOK] = goBible.bibleSource.getBookNumberFromIndex(currentPassage.getBookIndex());
-                    selection[SELECTION_CHAPTER] = currentPassage.getChapterIndex();
+                synchronized (getCurrentPassage()) {
+                    selection[SELECTION_BOOK] = goBible.bibleSource.getBookNumberFromIndex(getCurrentPassage().getBookIndex());
+                    selection[SELECTION_CHAPTER] = getCurrentPassage().getChapterIndex();
                     selection[SELECTION_VERSE] = goBible.bibleSource.getVerseNumberFromIndex(
-                            currentPassage.getBookIndex(), currentPassage.getChapterIndex(), currentPassage.getVerseIndex());
+                            getCurrentPassage().getBookIndex(), getCurrentPassage().getChapterIndex(), getCurrentPassage().getVerseIndex());
                 }
 
                 removeDefaultCommands();
@@ -1229,19 +1249,19 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                     // Do some sanity checks
                     
                     // book index overflow, translation changed, for example
-                    if (currentPassage.getBookIndex() > goBible.bibleSource.getNumberOfBooks()) {
+                    if (getCurrentPassage().getBookIndex() > goBible.bibleSource.getNumberOfBooks()) {
                         System.err.println("[BibleCanvas.paint()] currentPassage.bookIndex reset");
-                        currentPassage.setBookIndex(goBible.currentBookIndex);
+                        getCurrentPassage().setBookIndex(goBible.currentBookIndex);
                         
                         // TODO: siirtyminen suoraan select translation listille?
                         goBible.showAlertMessage(goBible.getString("UI-Error-Book-Not-Found-In-Translation"), AlertType.CONFIRMATION);
                     }
                     int numberOfChapters = goBible.bibleSource.getNumberOfChapters(
-                            currentPassage.getBookIndex());
+                            getCurrentPassage().getBookIndex());
                     
-                    if (currentPassage.getChapterIndex() >= numberOfChapters) {
+                    if (getCurrentPassage().getChapterIndex() >= numberOfChapters) {
 //                        currentPassage.chapterIndex = numberOfChapters - 1;
-                        currentPassage.setChapterIndex(goBible.currentChapterIndex);                        
+                        getCurrentPassage().setChapterIndex(goBible.currentChapterIndex);                        
                         
                         // TODO: siirtyminen suoraan select translation listille?
                         goBible.showAlertMessage(goBible.getString("UI-Error-Chapter-Exceeds-Index"), AlertType.CONFIRMATION);
@@ -1250,13 +1270,13 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 //                        goBible.showStackTrace(new Exception("Chapter exceeds number of chapters"), "paint()", currentPassage.toString());
                     }
                     int numberOfVerses = goBible.bibleSource.getNumberOfVerses(
-                            currentPassage.getBookIndex(), currentPassage.getChapterIndex());
-                    if (currentPassage.getVerseIndex() >= numberOfVerses) {
-                        currentPassage.setVerseIndex(numberOfVerses - 1);
+                            getCurrentPassage().getBookIndex(), getCurrentPassage().getChapterIndex());
+                    if (getCurrentPassage().getVerseIndex() >= numberOfVerses) {
+                        getCurrentPassage().setVerseIndex(numberOfVerses - 1);
                         goBible.showAlertMessage(goBible.getString("UI-Error-Verse-Exceeds-Index"), AlertType.CONFIRMATION);
 //                        goBible.showStackTrace(new Exception("Verse exceeds number of verses"), "paint()", currentPassage.toString());
                     }
-                    PassageReference pcontext = currentPassage.clone();
+                    PassageReference pcontext = getCurrentPassage().clone();
                     
                     linesPerScreen = (context.height - context.y) / TextStyle.fontHeight;
                     setStaticAllowance(plainFont.getHeight() / 3);
@@ -1268,7 +1288,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                     // minimize flickering.
                     if (! needCache ) {
                         normalizeReferences(context, pcontext);
-                        pcontext.cloneInto(currentPassage);
+                        pcontext.cloneInto(getCurrentPassage());
                         paintReference(context, pcontext);
                         context.g.setClip(0, context.y, width, TextStyle.fontHeight * linesPerScreen);
                         paintVerses(context, pcontext);
@@ -2253,7 +2273,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             else {
                 lastDrawnPosition.cloneInto(ctx);
             }
-            lastDrawnPosition.cloneInto(currentPassage);
+            lastDrawnPosition.cloneInto(getCurrentPassage());
             paintReference(context, lastDrawnPosition);
             System.out.println("Thread: " + Thread.currentThread().getName() + " - LAST POSITION STORED " + lastDrawnPosition.toString());
         }
@@ -2360,12 +2380,12 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                         }
                     }
                 }
-                synchronized (currentPassage) {
-                    if (currentPassage.sameVerse(task)) {
-                        currentPassage.setBookIndex(simplerRef.getBookIndex());
-                        currentPassage.setChapterIndex(simplerRef.getChapterIndex());
-                        currentPassage.setVerseIndex(simplerRef.getVerseIndex());
-                        currentPassage.setLineOffset(currentPassage.getLineOffset() - (task.getLineOffset() - simplerRef.getLineOffset()));
+                synchronized (getCurrentPassage()) {
+                    if (getCurrentPassage().sameVerse(task)) {
+                        getCurrentPassage().setBookIndex(simplerRef.getBookIndex());
+                        getCurrentPassage().setChapterIndex(simplerRef.getChapterIndex());
+                        getCurrentPassage().setVerseIndex(simplerRef.getVerseIndex());
+                        getCurrentPassage().setLineOffset(getCurrentPassage().getLineOffset() - (task.getLineOffset() - simplerRef.getLineOffset()));
                     }
                 }
                 synchronized (lastDrawnPosition) {
@@ -2440,6 +2460,15 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
     public void setTextColour(int textColour) {
         this.textColour = textColour;
     }
+
+    /**
+     * @return the currentPassage
+     */
+    public PassageReference getCurrentPassage() {
+        return currentPassage;
+    }
+   
+    
         private class Rectangle {
             public int x, y, width, height;
 
