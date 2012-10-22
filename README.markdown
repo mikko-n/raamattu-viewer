@@ -6,15 +6,15 @@ on [GNU GPLv2][1] -licenced GoBible 2.4 symscroll -branch from [Crosswire Bible 
 Features added
 --------------
 *   Finnish UI-translation
-*   Multi-translation support
-*   .zip -file readonly support (via modified [JazzLib 0.07][3] and [Albite RandomReadingFile][4]
+*   *NEW* Multi-translation support with arbitrary location for translations (via modified NetBeans [FileBrowser][netBns] from PDA package)
+*   .zip -file readonly support (via modified [JazzLib 0.07][3] and [Albite RandomReadingFile][4])
 *   Bible data files zipped and moved to memory card
 *   Updated theme selection form and added theme suitable for night-reading
 *   Updated book/chapter/verse -forms more suitable for touch usage (similar to AndBible)
 *   real fake *italic* text instead of different color+underlining
 *   added exception handling and recovery from various error situations
 *   keyboard shortcut to enter/exit fullscreen
-*   new icon
+*   *NEW* new icon(s)
 
 ToolChain
 ---------
@@ -31,6 +31,9 @@ Pure *Java* implementation of `java.util.zip` classes ported to Java ME by me. T
 
 ### AlbiteRandomReadingFile
 Implementation without writing capabilities of `RandomAccessFile` in Java Mobile (J2ME) using FileConnection.
+
+### NetBeans JavaME Component library
+I have used org.netbeans.microedition.lcdui.FileBrowser class lifted from Netbeans JavaME Component library sources and extended it a little bit. With brand new icons!
 
 Installation
 ------------
@@ -52,7 +55,6 @@ Known issues and future development plans
 ### Installation ease-up
 *   Separate Bluetooth-app to send .jar/.jad files on Nokia phones (Nokia has disabled this feature)
 *   Translation downloads from app
-*   Custom translation folder instead of current hard-coded one
 *   Download from app stores?
 
 ### Usage ease-up and improvements
@@ -77,3 +79,4 @@ Known issues and future development plans
 [4]: https://github.com/dumbledore/AlbiteRandomReadingFile
 [5]: https://crosswire.org/svn/sword/trunk/
 [gDocs]: https://docs.google.com/folder/d/0B82abpkursG5eEVFNjEzc1VpdVE/edit
+[netBns]: http://wiki.netbeans.org/JavaMEComponent_MELibrary
