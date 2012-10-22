@@ -282,7 +282,10 @@ public class FileBrowser extends List implements CommandListener {
             if (currDirName.equals(goBible.bookUrl)
                     && items.getString(i).equals(currFile)) {
                 items.set(i, items.getString(i), selectedIcon);
-            } else {
+            } else if (items.getString(i).endsWith(SEP_STR) || items.getString(i).equals(UP_DIRECTORY)) {
+                items.set(i,items.getString(i), dirIcon);
+            }
+            else {
                 items.set(i, items.getString(i), fileIcon);
             }
         }
