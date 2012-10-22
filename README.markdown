@@ -6,7 +6,7 @@ on [GNU GPLv2][1] -licenced GoBible 2.4 symscroll -branch from [Crosswire Bible 
 Features added
 --------------
 *   Finnish UI-translation
-*   *NEW* Multi-translation support with arbitrary location for translations (via modified NetBeans [FileBrowser][netBns] from PDA package)
+*   Multi-translation support with arbitrary location for translations (via modified NetBeans [FileBrowser][netBns] from PDA package)
 *   .zip -file readonly support (via modified [JazzLib 0.07][3] and [Albite RandomReadingFile][4])
 *   Bible data files zipped and moved to memory card
 *   Updated theme selection form and added theme suitable for night-reading
@@ -14,7 +14,7 @@ Features added
 *   real fake *italic* text instead of different color+underlining
 *   added exception handling and recovery from various error situations
 *   keyboard shortcut to enter/exit fullscreen
-*   *NEW* new icon(s)
+*   new icon(s)
 
 ToolChain
 ---------
