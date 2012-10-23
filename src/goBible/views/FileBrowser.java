@@ -486,7 +486,10 @@ public class FileBrowser extends List implements CommandListener {
      * Sets selected URL handle from <code>currDirName</code> and <code>currFile</code>
      */
     private void doDismiss() {
-        selectedURL = "file:///" + currDirName + currFile;
+        selectedURL = 
+                ((System.getProperty("fileconn.dir.memorycard") != null) ? System.getProperty("fileconn.dir.memorycard"): "file:///")+
+                 currDirName + currFile;
+        System.out.println("[FileBrowser.doDismiss] selectedUrl="+selectedURL);
     }
 
     /**

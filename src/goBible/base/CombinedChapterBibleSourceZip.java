@@ -84,15 +84,23 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
     public CombinedChapterBibleSourceZip(GoBible goBible, String translationRoot) throws IOException, TranslationNotFoundException {
         super(goBible);
 
-        BIBLE_DATA = "file://" + goBible.bookUrl + goBible.getTranslation();
+        if ((System.getProperty("fileconn.dir.memorycard") != null)) {
+            BIBLE_DATA = System.getProperty("fileconn.dir.memorycard")+goBible.bookUrl.substring(2)+goBible.getTranslation();
+        } else {
+            BIBLE_DATA = "file:///"+ goBible.bookUrl + goBible.getTranslation();
+        }
 
+        System.out.println("[CombinedChapterBibleSource.const] gobible.bookUrl = " + goBible.bookUrl);
+        System.out.println("[CombinedChapterBibleSource.const] gobible.getTranslation() = " + goBible.getTranslation());
         System.out.println("[CombinedChapterBibleSource.const] BIBLE_DATA = " + BIBLE_DATA);
         System.out.println("[CombinedChapterBibleSource.const] biblelocation = " + bibleLocation);
 
         RandomReadingFile rrf;
         try {
+            
             rrf = new RandomReadingFile(BIBLE_DATA);
         } catch (Exception e) {
+            System.out.println("[CombinedChapterBibleSourceZip.const] rrf init failed!");
             throw new TranslationNotFoundException(GoBible.getString("UI-Translation-Not-Found"));
         }
 
