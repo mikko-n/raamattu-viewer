@@ -37,6 +37,8 @@ public class PrefsForm extends Form implements CommandListener {
     private ChoiceGroup redLetterChoice;
     private ChoiceGroup reverseColoursChoice;
     private ChoiceGroup reverseCharactersChoice;
+    private ChoiceGroup logLevel;
+    
     private String[] themeNames = new String[]{
         GoBible.getString("UI-Theme-Paper"),
         GoBible.getString("UI-Theme-Computer"),
@@ -83,13 +85,13 @@ public class PrefsForm extends Form implements CommandListener {
 
         this.goBible = goBible;
 
-        System.err.println("[PrefsForm.createThemeImage()] populating images");
+        goBible.Log("[PrefsForm.createThemeImage()] populating images");
         themeImages = new Image[]{
             createThemeImage(0), createThemeImage(1), createThemeImage(2),
             createThemeImage(3), createThemeImage(4), createThemeImage(5)
         };
 
-        System.err.println("[PrefsForm const] before populating choiceGroup");
+        goBible.Log("[PrefsForm const] before populating choiceGroup");
         themeChoice = new ChoiceGroup(GoBible.getString("UI-Theme") + ":", Choice.POPUP, themeNames, themeImages);
 
         themeChoice.setSelectedIndex(goBible.theme, true);
@@ -127,6 +129,10 @@ public class PrefsForm extends Form implements CommandListener {
         reverseCharactersChoice.setSelectedIndex(TextStyle.reverseCharacters ? 0 : 1, true);
         append(reverseCharactersChoice);
 
+        logLevel = new ChoiceGroup(GoBible.getString("UI-Log-To-File")+":", Choice.EXCLUSIVE, new String[]{GoBible.getString("UI-On"), GoBible.getString("UI-Off")}, null);
+        logLevel.setSelectedIndex(goBible.LOG_TO_FILE ? 0 : 1, true);
+        append(logLevel);
+        
         addCommand(saveCommand);
         addCommand(cancelCommand);
         setCommandListener(this);
@@ -159,6 +165,8 @@ public class PrefsForm extends Form implements CommandListener {
                     TextStyle.redLetter = (redLetterChoice.getSelectedIndex() == 0);
                     
                     TextStyle.backColour = GoBible.THEME_BACK_COLOUR[goBible.theme];
+                    
+                    goBible.LOG_TO_FILE = (logLevel.getSelectedIndex() == 0);
 
                     // Go back to the main screen
                     goBible.showMainScreen();

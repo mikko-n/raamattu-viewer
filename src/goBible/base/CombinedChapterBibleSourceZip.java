@@ -7,7 +7,8 @@ package goBible.base;
 //	Go Bible is a Free Bible viewer application for Java mobile phones (J2ME MIDP 1.0 and MIDP 2.0).
 //	Copyright © 2003-2008 Jolon Faichney.
 //	Copyright © 2008-2009 CrossWire Bible Society.
-//
+//      Copyright © 2011-2012 Mikko Nieminen
+
 //	This program is free software; you can redistribute it and/or
 //	modify it under the terms of the GNU General Public License
 //	as published by the Free Software Foundation; either version 2
@@ -22,14 +23,12 @@ package goBible.base;
 //	along with this program; if not, write to the Free Software
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-import goBible.common.TranslationNotFoundException;
 import goBible.common.GBCToolkit;
+import goBible.common.TranslationNotFoundException;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
 import net.sf.jazzlib.ZipEntry;
+import net.sf.jazzlib.ZipException;
 import net.sf.jazzlib.ZipFile;
 import org.albite.io.RandomReadingFile;
 
@@ -37,8 +36,8 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
 
     private String BIBLE_DATA = GoBible.BIBLE_DATA_ROOT + "FinPR92";
     // data root location inside zip file
-    private String DATAFILES_ROOT = "Bible Data/";
-    String bibleLocation = DATAFILES_ROOT + "Index";
+    private final String DATAFILES_ROOT = "Bible Data/";
+    private final String bibleLocation = DATAFILES_ROOT + "Index";
     private GoBible goBible;
     
     // Current chapter loaded
@@ -75,44 +74,73 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
     private int verseLookups[] = {};
     // file which holds the bible data
     private ZipFile zipFile;
-
+        
     public CombinedChapterBibleSourceZip(GoBible goBible) throws IOException, TranslationNotFoundException {
         this(goBible, goBible.getTranslation());
         this.goBible = goBible;
+        
     }
-
+    
+    
     public CombinedChapterBibleSourceZip(GoBible goBible, String translationRoot) throws IOException, TranslationNotFoundException {
         super(goBible);
 
-        if ((System.getProperty("fileconn.dir.memorycard") != null)) {
-            BIBLE_DATA = System.getProperty("fileconn.dir.memorycard")+goBible.bookUrl.substring(2)+goBible.getTranslation();
-        } else {
-            BIBLE_DATA = "file:///"+ goBible.bookUrl + goBible.getTranslation();
+        if (goBible.getCurrentUrl() != null) {
+            BIBLE_DATA = goBible.getCurrentUrl();  
         }
+        else {
+            throw new TranslationNotFoundException(GoBible.getString("UI-Translation-Not-Found")+" "+BIBLE_DATA);
+        }
+        
+//        System.out.println("[CombinedChapterBibleSource.const] gobible.bookUrl = " + goBible.bookUrl);
+//        System.out.println("[CombinedChapterBibleSource.const] gobible.getTranslation() = " + goBible.getTranslation());
+//        System.out.println("[CombinedChapterBibleSource.const] BIBLE_DATA = " + BIBLE_DATA);
+//        System.out.println("[CombinedChapterBibleSource.const] FileBrowser.selectedURL = " + goBible.getFileBrowser().getSelectedFileURL());
+//        
 
-        System.out.println("[CombinedChapterBibleSource.const] gobible.bookUrl = " + goBible.bookUrl);
-        System.out.println("[CombinedChapterBibleSource.const] gobible.getTranslation() = " + goBible.getTranslation());
-        System.out.println("[CombinedChapterBibleSource.const] BIBLE_DATA = " + BIBLE_DATA);
-        System.out.println("[CombinedChapterBibleSource.const] biblelocation = " + bibleLocation);
-
+        goBible.Log("[CombinedChapterBibleSource.const] BIBLE_DATA = " + BIBLE_DATA);
+//        goBible.Log("[CombinedChapterBibleSource.const] FileBrowser.selectedURL = " + goBible.getFileBrowser().getSelectedFileURL());
+        goBible.Log("[CombinedChapterBibleSource.const] biblelocation = " + bibleLocation);
+        
         RandomReadingFile rrf;
-        try {
+        
+        try {            
+            rrf = new RandomReadingFile(BIBLE_DATA);            
+            goBible.Log("[CombinedChapterBibleSourceZip.const] RandomReadingFile created, URL:"+rrf.getURL());
             
-            rrf = new RandomReadingFile(BIBLE_DATA);
-        } catch (Exception e) {
-            System.out.println("[CombinedChapterBibleSourceZip.const] rrf init failed!");
-            throw new TranslationNotFoundException(GoBible.getString("UI-Translation-Not-Found"));
+        } catch (Exception e) {            
+            goBible.Log("[CombinedChapterBibleSourceZip.const] Exception: "+ e.toString()+", "+BIBLE_DATA);            
+            goBible.Log("[CombinedChapterBibleSourceZip.const] trying recovery...");
+            try {            
+                BIBLE_DATA = System.getProperty("fileconn.dir.memorycard")+"Raamatut"+System.getProperty("file.separator")+goBible.getTranslation();
+                goBible.Log("[CombinedChapterBibleSourceZip.const] BIBLE_DATA set to: "+BIBLE_DATA);
+                rrf = new RandomReadingFile(BIBLE_DATA);
+            }
+            catch (Exception ex) {
+                goBible.Log("[CombinedChapterBibleSourceZip.const] recovery failed with "+ex.toString());
+                throw new TranslationNotFoundException(GoBible.getString("UI-Translation-Not-Found"));
+            }
         }
 
         zipFile = null;
 
         try {
             zipFile = new ZipFile(rrf);
+            goBible.Log("ZipFile created");
         } catch (IOException ioEx) {
+            goBible.Log("[CombinedChapterBibleSourceZip.const] Exception: "+ ioEx.toString());
             throw new IOException("Err opening conn: " + ioEx.getMessage() + ", filepath: " + bibleLocation);
         }
 
-        ZipEntry ze = zipFile.getEntry(bibleLocation);
+        ZipEntry ze = null;
+        try {
+            ze = zipFile.getEntry(bibleLocation);
+            goBible.Log("ZipEntry created");
+        }
+        catch (Exception e) {
+            goBible.Log("[CombinedChapterBibleSource.const] exception while creating ZipEntry with bibleLocation="+bibleLocation+" - "+e.toString());
+            throw new ZipException("Error error...");
+        }
 
         boolean error = false;
 
@@ -120,18 +148,28 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
         DataInputStream input = null;
         try {
             input = new DataInputStream(zipFile.getInputStream(ze));
+            goBible.Log("DataInputStream created");
         } catch (IOException ioEx) {
-
             if (input == null) {
                 throw new TranslationNotFoundException(GoBible.getString("UI-Translation-Not-Found"));
             }
             throw new IOException("Err opening stream: " + ioEx.getMessage()
                     + ", url: " + rrf.getURL());
+        } catch (Exception e) {            
+            goBible.Log("[CombinedChapterBibleSource.const] exception while creating DataInputStream: "+ e.toString());            
+            if (zipFile == null) {
+                goBible.Log("[CombinedChapterBibleSource.const] zipfile was null");            
+            }
+            if (ze == null) {
+                goBible.Log("[CombinedChapterBibleSource.const] zipentry was null");
+            }
+            error = true;
         }
+        
 
         if (!error) {
             // Read in the number of books
-
+            goBible.Log("no errors, start to read in values from datafile");
             numberOfBooks = input.read();
 
             bookNames = new String[numberOfBooks];
@@ -140,6 +178,8 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
             numberOfChapters = new int[numberOfBooks];
             combinedChapterIndex = new int[numberOfBooks][];
 
+            goBible.Log("so far so good:");
+            
             for (int bookIndex = 0; bookIndex < numberOfBooks; bookIndex++) {
                 // Read in the name of the book
                 bookNames[bookIndex] = input.readUTF();
@@ -173,27 +213,53 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
                     combinedChapterIndex[bookIndex][(chapterIndex << 2) + 3] = input.read();
 
                     verseDataOffset += allVersesLength;
-                }
+                }                
             }
-
+            
             input.close();
-
+            goBible.Log("DatainputStream closed");
+            
             // Read in the reference lookup map
             String referenceLocation = DATAFILES_ROOT + "Reference Lookup";
 
             ze = null;
-            ze = zipFile.getEntry(referenceLocation);
-
-            InputStream refLookup = zipFile.getInputStream(ze);
-
-            if (refLookup != null) {
-                input = new DataInputStream(refLookup);
-                readReference(input);
+            try {
+                ze = zipFile.getEntry(referenceLocation);
+                goBible.Log("ZipEntry created");
+            } catch (Exception e) {
+                goBible.Log("[CombinedChapterBibleSource.const] exception while creating ZipEntry with referenceLocation=" + referenceLocation + " - " + e.toString());
+                throw new ZipException("Error error...");
             }
+            
+            try {
+                input = new DataInputStream(zipFile.getInputStream(ze));
+            } catch (IOException ioEx) {
+                throw new IOException("Err opening stream: " + ioEx.getMessage()
+                        + ", url: " + rrf.getURL());
+            } catch (Exception e) {
+                goBible.Log("[CombinedChapterBibleSource.const] exception while creating reference lookup DataInputStream: " + e.toString());
+            }
+
+            goBible.Log("[CombinedChapterBibleSource.const] start reading reference lookup table");
+            if (input != null) {
+                try {
+                    readReference(input);
+                }catch (Exception e) {
+                    goBible.Log("[CombinedChapterBibleSource.const] error while reading reference lookup: "+e.toString() );
+                }
+                
+            } else {
+                goBible.Log("[CombinedChapterBibleSourceZip.const] reference DataInputStream was null, trying to recover...");
+                readReference(new DataInputStream(zipFile.getInputStream(ze)));
+                goBible.Log("[CombinedChapterBibleSourceZip.const] reference DataInputStream recovery successful!");
+            }
+            
+            
         }
+        goBible.Log("[CombinedChapterBibleSourceZip.const] finished");
 
     }
-
+        
     private void readReference(DataInputStream dis) {
         // read in a section_entry
         char c1 = 0, c2 = 0;
@@ -205,12 +271,15 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
                 c1 = (char) dis.readByte();
                 c2 = (char) dis.readByte();
             } catch (IOException ioe) {
-                System.err.println("Error while reading section name, " + bytesRead + ", " + c1 + c2);
+                goBible.Log("[CombinedChapterBibleSourceZip.readReference] Error while reading section name, " + bytesRead + ", " + c1 + c2);
+                break;
+            } catch (Exception e) {
+                goBible.Log("[CombinedChapterBibleSourceZip.readReference] "+ e.toString());
                 break;
             }
             bytesRead += 2;
 
-            System.err.println("Read in section " + c1 + c2);
+            goBible.Log("Read in section " + c1 + c2);
 
             if (c1 == 0 && c2 == 0) { // terminating entry encountered
                 break;
@@ -233,7 +302,10 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
                         dis.skip(length);
                     }
                 } catch (IOException ioe) {
-                    System.err.println("Error while reading position, length and section data");
+                    goBible.Log("Error while reading position, length and section data");
+                    break;
+                }catch (NullPointerException npe) {                    
+                    goBible.Log("Error while reading position, length and section data: "+npe.toString());
                     break;
                 }
             }
@@ -251,7 +323,7 @@ public class CombinedChapterBibleSourceZip extends BibleSource {
             entry = dis.readShort();
             bytesRead += 2;
 
-            System.err.println("New Book Mapping: "
+            goBible.Log("[CombinedChapterBibleSourceZip.readBookLookup] New Book Mapping: "
                     + ((entry >> 8) & 0xFF) + ", "
                     + ((entry >> 0) & 0xFF) + "");
 

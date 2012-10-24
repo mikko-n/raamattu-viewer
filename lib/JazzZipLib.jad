@@ -1,5 +1,5 @@
 MIDlet-1: ZipTest,,net.kodes.test.ZipTest
-MIDlet-Jar-Size: 40636
+MIDlet-Jar-Size: 39787
 MIDlet-Jar-URL: JazzZipLib.jar
 MIDlet-Name: JazzZipLib
 MIDlet-Permissions: javax.microedition.io.Connector.file.read

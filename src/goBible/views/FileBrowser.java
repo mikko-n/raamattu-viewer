@@ -71,7 +71,7 @@ public class FileBrowser extends List implements CommandListener {
     private Image fileIcon;
     private Image selectedIcon;
     private Image[] iconList;
-    private CommandListener commandListener;
+//    private CommandListener commandListener;
 
     /*
      * special string denotes upper directory
@@ -93,7 +93,7 @@ public class FileBrowser extends List implements CommandListener {
      * separator character as defined by FC specification
      */
     private static final char SEP = '/';
-    private Display display;
+//    private Display display;
     private String selectedURL;
     private String filter = null;
     private String title;
@@ -114,11 +114,7 @@ public class FileBrowser extends List implements CommandListener {
         } else {
             currDirName = MEGA_ROOT;
         }
-
-        this.display = goBible.display;
-        super.setCommandListener(this);
-
-        setSelectCommand(SELECT_FILE_COMMAND);
+        
         try {
             dirIcon = Image.createImage("/dir.png");
         } catch (IOException e) {
@@ -137,6 +133,9 @@ public class FileBrowser extends List implements CommandListener {
         iconList = new Image[]{fileIcon, dirIcon, selectedIcon};
 
         showDir();
+        
+        setSelectCommand(SELECT_FILE_COMMAND);
+        setCommandListener(this);
     }
 
     /**
@@ -164,6 +163,7 @@ public class FileBrowser extends List implements CommandListener {
                         currDir.close();
                     }
                 } catch (IOException ioe) {
+                    goBible.Log("[FileBrowser.setDir] IOException: "+ioe.toString());
                     ioe.printStackTrace();
                 }
             }
@@ -216,9 +216,11 @@ public class FileBrowser extends List implements CommandListener {
         try {
             showCurrDir();
         } catch (SecurityException e) {
-            Alert alert = new Alert("Error", "You are not authorized to access the restricted API", null, AlertType.ERROR);
-            alert.setTimeout(2000);
-            display.setCurrent(alert, FileBrowser.this);
+//            Alert alert = new Alert("Error", "You are not authorized to access the restricted API", null, AlertType.ERROR);
+//            alert.setTimeout(2000);
+//            goBible.display.setCurrent(alert, goBib);
+            goBible.Log("[FileBrowser.showDir] Exception:"+e.toString());
+            goBible.showMainScreen();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -237,37 +239,40 @@ public class FileBrowser extends List implements CommandListener {
      * <code>Displayable</code> on which this event has occurred
      */
     public final void commandAction(final Command c, final Displayable d) {
-        if (c.equals(SELECT_FILE_COMMAND)) {
-            List curr = (List) d;
-            currFile = curr.getString(curr.getSelectedIndex());
+        if (d == this) {
+            if (c.equals(SELECT_FILE_COMMAND)) {
+                List curr = (List) d;
+                currFile = curr.getString(curr.getSelectedIndex());
 
-            if (currFile.endsWith(SEP_STR) || currFile.equals(UP_DIRECTORY)) {
-                openDir(currFile);
-            } else {
-                // System.out.println("[FileBrowser.commandAction] selected file="+ goBible.translationItemStringToFilename(currFile)+", gobible.getTranslation()="+goBible.getTranslation());
+                if (currFile.endsWith(SEP_STR) || currFile.equals(UP_DIRECTORY)) {
+                    openDir(currFile);
+                } else {
+                    // System.out.println("[FileBrowser.commandAction] selected file="+ goBible.translationItemStringToFilename(currFile)+", gobible.getTranslation()="+goBible.getTranslation());
 
-                // if user selected current translation book, just cancel
-                if (currDirName.equals(goBible.bookUrl)
-                        && goBible.translationItemStringToFilename(currFile).equals(goBible.getTranslation())) {
+                    // if user selected current translation book, just cancel
+                    if (currDirName.equals(goBible.bookUrl)
+                            && goBible.translationItemStringToFilename(currFile).equals(goBible.getTranslation())) {
+                        goBible.display.setCurrent(goBible.bibleCanvas);
+                        goBible.showMainScreen();
+                        return;
+                    }
+
+                    goBible.bookUrl = currDirName;
+                    goBible.setTranslation(currFile);                    
+                    doDismiss();
+                    goBible.setCurrentUrl(selectedURL);
+
+                    updateSelectedIcon(curr);
+                    goBible.run();
                     goBible.display.setCurrent(goBible.bibleCanvas);
-                    goBible.showMainScreen();
-                    return;
                 }
-
-                goBible.bookUrl = currDirName;
-                goBible.setTranslation(currFile);
-                updateSelectedIcon(curr);
-                goBible.run();
+            } else if (c.equals(CANCEL_COMMAND)) {
                 goBible.display.setCurrent(goBible.bibleCanvas);
+                goBible.showMainScreen();
 
-                doDismiss();
+            } else {
+                this.commandAction(c, d);
             }
-        } else if (c.equals(CANCEL_COMMAND)) {
-            goBible.display.setCurrent(goBible.bibleCanvas);
-            goBible.showMainScreen();
-
-        } else {
-            commandListener.commandAction(c, d);
         }
     }
 
@@ -460,36 +465,37 @@ public class FileBrowser extends List implements CommandListener {
     public final void setFilter(final String filter) {
         this.filter = filter;
     }
-
-    /**
-     * Returns command listener.
-     *
-     * @return non null
-     * <code>CommandListener</code> object
-     */
-    protected final CommandListener getCommandListener() {
-        return commandListener;
-    }
-
-    /**
-     * Sets command listener to this component.
-     *
-     * @param commandListener
-     * <code>CommandListener</code> to be used
-     */
-    public final void setCommandListener(final CommandListener commandListener) {
-
-        this.commandListener = commandListener;
-    }
+//
+//    /**
+//     * Returns command listener.
+//     *
+//     * @return non null
+//     * <code>CommandListener</code> object
+//     */
+//    protected final CommandListener getCommandListener() {
+//        return commandListener;
+//    }
+//
+//    /**
+//     * Sets command listener to this component.
+//     *
+//     * @param commandListener
+//     * <code>CommandListener</code> to be used
+//     */
+//    public final void setCommandListener(final CommandListener commandListener) {
+//
+//        this.commandListener = commandListener;
+//    }
 
     /**
      * Sets selected URL handle from <code>currDirName</code> and <code>currFile</code>
      */
     private void doDismiss() {
-        selectedURL = 
-                ((System.getProperty("fileconn.dir.memorycard") != null) ? System.getProperty("fileconn.dir.memorycard"): "file:///")+
-                 currDirName + currFile;
-        System.out.println("[FileBrowser.doDismiss] selectedUrl="+selectedURL);
+       
+        selectedURL = "file:///"+currDirName + goBible.translationItemStringToFilename(currFile);
+        
+        goBible.Log("[FileBrowser.doDismiss] currDirName="+currDirName);
+        goBible.Log("[FileBrowser.doDismiss] selectedUrl="+selectedURL);
     }
 
     /**

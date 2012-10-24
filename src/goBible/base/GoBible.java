@@ -7,6 +7,7 @@ package goBible.base;
 //	Go Bible is a Free Bible viewer application for Java mobile phones (J2ME MIDP 1.0 and MIDP 2.0).
 //	Copyright © 2003-2008 Jolon Faichney.
 //	Copyright © 2008-2009 CrossWire Bible Society.
+//      Copyright © 2011-2012 Mikko Nieminen
 //
 //	This program is free software; you can redistribute it and/or
 //	modify it under the terms of the GNU General Public License
@@ -32,11 +33,14 @@ import goBible.common.*;
 import goBible.views.*;
 import java.io.*;
 import java.util.*;
+import javax.microedition.io.Connector;
+import javax.microedition.io.file.FileConnection;
 import javax.microedition.lcdui.*;
 import javax.microedition.lcdui.game.GameCanvas;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
+import net.sf.javame.io.BufferedInputStream;
 
 public class GoBible extends MIDlet implements Runnable
 {
@@ -130,8 +134,7 @@ public class GoBible extends MIDlet implements Runnable
 
     //private SplashScreen splashScreen;
     public BibleCanvas bibleCanvas;
-    //private GotoForm gotoForm;
-//    private PrefsForm prefsForm;
+
     FileBrowser fileBrowser;
 
     private boolean firstRun = true;
@@ -140,9 +143,7 @@ public class GoBible extends MIDlet implements Runnable
             (System.getProperty("file.separator") != null) ? System.getProperty("file.separator") : "/";
     
     public final static String BIBLE_DATA_ROOT = "/";
-//            (System.getProperty("fileconn.dir.memorycard") != null) ? System.getProperty("fileconn.dir.memorycard")+"Raamatut"+FILE_SEPARATOR :
-//            "file:"+FILE_SEPARATOR+FILE_SEPARATOR+"CFROOT"+FILE_SEPARATOR+"Raamatut"+FILE_SEPARATOR;
-//    
+    
     public int currentBookIndex = 0;
     public int currentChapterIndex = 0;
     public int currentVerseIndex = 0;
@@ -158,14 +159,19 @@ public class GoBible extends MIDlet implements Runnable
     public boolean reverseColours = false;
     public static float lineHeight = 0f;
 
+    // Logging preference
+    
+    public boolean LOG_TO_FILE = false;    
+    
     // Current chapter contents
     public int[] verseIndex;
     public char[] verseData;
 
     public BibleSource bibleSource;
-    private String translation = "Raamattu1992.zip";
+    private String translation = "Raamattu1938.zip";
     public final static String[] SUPPORTED_FILE_EXTENSIONS = new String[]{".zip"};
-    public String bookUrl ="E:/Raamatut/";
+    public String bookUrl ="Raamatut/";
+    private String currentUrl = "file:///E:/"+bookUrl+translation;
     
     // Search preferences
     public String lastSearchString = "";
@@ -221,6 +227,8 @@ public class GoBible extends MIDlet implements Runnable
     public long byteToCharTime;
     public long loadChapterTime;
     public long skipTime;
+    
+    FileConnection fileConnection;
 
     public void startApp()
     {   
@@ -308,6 +316,32 @@ public class GoBible extends MIDlet implements Runnable
         }
     }
 
+       
+    public void Log(String msg) {        
+        try {
+            if (LOG_TO_FILE) {
+                boolean firstEntry = false;
+                fileConnection = (FileConnection) Connector.open("file:///E:/log.txt", Connector.READ_WRITE);
+                if (!fileConnection.exists()) {
+                    fileConnection.create();
+                    firstEntry = true;
+                }
+
+                PrintStream ops = new PrintStream(fileConnection.openOutputStream(fileConnection.fileSize()));
+                if (firstEntry) {
+                    ops.println("******* New log ********");
+                    firstEntry = false;
+                }
+                ops.println(msg);
+                ops.flush();
+                ops.close();
+                fileConnection.close();
+            }
+        } catch (IOException e) {
+        } finally {
+            System.out.println(msg);
+        }
+    }
     /**
      * This method is part of the Runnable interface and is called from startApp()
      * through the Display.callSerially() method so that the splash screen can be
@@ -320,7 +354,7 @@ public class GoBible extends MIDlet implements Runnable
         // Read in the current chapter
         try
         {
-//            bibleSource = new MultiTranslationBibleSource(this);
+
             BibleSource uusi = new CombinedChapterBibleSourceZip(this);
                      
             if (currentBookIndex > uusi.getNumberOfBooks()) {
@@ -340,28 +374,31 @@ public class GoBible extends MIDlet implements Runnable
                 System.err.println("[GoBible.java/run()] Verse index mismatch, resetting verse");
             }
             bibleSource = uusi;
-            
+            Log("[GoBible.run] bibleSource set successful, start loading current chapter");
             loadCurrentChapter();
         }
         catch (IOException e)
         {
             error = true;
-            System.out.println("Error");
+            Log("[GoBible.run] IOException! "+ e.toString());
             
-            display.setCurrent(new Alert(getString("UI-Error"), e.toString(), null, AlertType.ERROR));
+            display.setCurrent(new Alert(getString("UI-Error"), e.getMessage(), null, AlertType.ERROR));
         }
         catch (TranslationNotFoundException e) {
             error = true;
+            Log("[GoBible.run] TranslationNotFoundException! "+ e.toString());
             Alert a = new Alert(GoBible.getString("UI-Error"),
-                        GoBible.getString("UI-Translation-Not-Found"), null,
+                        e.getMessage(), null,
                         AlertType.ERROR);
-            a.setTimeout(2000);
-            display.setCurrent(a, getFileBrowser());
+//            a.setTimeout(2000);
+            display.setCurrent(a, new FileBrowser(this));
                 
         }
         catch (Exception e) {
             error = true;
+            Log("[GoBible.run] Exception! "+ e.toString());
 //            showStackTrace(e, "GoBible.run()", "Err");
+            
             e.printStackTrace();
         }
 
@@ -369,7 +406,7 @@ public class GoBible extends MIDlet implements Runnable
         {
             // Also create the goto screen for use later
             //gotoForm = new GotoForm(this);
-            
+            Log("[GoBible.run] all ok, calling showMainScreen()");
             showMainScreen();
         }
     }
@@ -551,15 +588,11 @@ public class GoBible extends MIDlet implements Runnable
 
     public void showGotoScreen()
     {
-//            GotoForm gotoForm = null;
-//            if (gotoForm == null) {
-//                gotoForm = new GotoForm(this);
-//            }
             GotoFormBook gotoForm = null;
             if (gotoForm == null) {
                 gotoForm = new GotoFormBook(this);
             }
-//            gotoForm.gotoPassage(currentBookIndex, currentChapterIndex, currentVerseIndex);
+
             display.setCurrent(gotoForm);
     }
     
@@ -589,27 +622,28 @@ public class GoBible extends MIDlet implements Runnable
     
     public void showChangeTranslationScreen() 
     {
-        
-//            SelectTranslationList selectTranslationList = new SelectTranslationList(this);
-//            display.setCurrent(selectTranslationList);
-     
-        
-        display.setCurrent(getFileBrowser());
-    }
-    
-     public FileBrowser getFileBrowser() {
+        FileBrowser fileBrowser = null;
         if (fileBrowser == null) {
             fileBrowser = new FileBrowser(this);
-            fileBrowser.setTitle(GoBible.getString("UI-Change-Translation"));        
-//            fileBrowser.setFilter("");
-            fileBrowser.setCommandListener(fileBrowser);
-            fileBrowser.addCommand(FileBrowser.SELECT_FILE_COMMAND);
-            fileBrowser.addCommand(FileBrowser.CANCEL_COMMAND);
-            // write post-init user code here
             fileBrowser.setDir(getCurrentBookFolder());
-        }        
-        return fileBrowser;
+        }
+        display.setCurrent(fileBrowser);
+
     }
+    
+//     public FileBrowser getFileBrowser() {
+//        if (fileBrowser == null) {
+//            fileBrowser = new FileBrowser(this);
+//            fileBrowser.setTitle(GoBible.getString("UI-Change-Translation"));        
+//            fileBrowser.setFilter("");
+//            fileBrowser.setCommandListener(fileBrowser);
+//            fileBrowser.addCommand(FileBrowser.SELECT_FILE_COMMAND);
+//            fileBrowser.addCommand(FileBrowser.CANCEL_COMMAND);
+//            // write post-init user code here
+//            fileBrowser.setDir(getCurrentBookFolder());
+//        }        
+//        return fileBrowser;
+//    }
     /**
      * Returns current translation file folder 
      * (does not include filename, see <code>getTranslation()</code>)
@@ -639,6 +673,7 @@ public class GoBible extends MIDlet implements Runnable
     public void setTranslation(String translationFile) {
         if (ZIP_COMPLIANT) {
             this.translation = translationItemStringToFilename(translationFile);
+            Log("[GoBible.setTranslation("+translationFile+") translation set to: "+this.translation);
         } else {
             this.translation = translationFile;
         }
@@ -1193,6 +1228,9 @@ public class GoBible extends MIDlet implements Runnable
 
                 // Read in reverse colours
                 reverseColours = input.readBoolean();
+                
+                // Read in logging preference
+                LOG_TO_FILE = input.readBoolean();
 
                 // Get the font style
                 fontStyle = input.readByte();
@@ -1261,6 +1299,9 @@ public class GoBible extends MIDlet implements Runnable
 
                     // Write out reverse colours
                     output.writeBoolean(reverseColours);
+                    
+                    // Write out logging preference
+                    output.writeBoolean(LOG_TO_FILE);
 
                     // Write out the font style
                     output.write(fontStyle);
@@ -1629,5 +1670,19 @@ public class GoBible extends MIDlet implements Runnable
         Command exitCommand = new Command(GoBible.getString("UI-Exit"),Command.EXIT,0);
         tb.addCommand(exitCommand);
         this.display.setCurrent(tb);
+    }
+
+    /**
+     * @return the currentUrl
+     */
+    public String getCurrentUrl() {
+        return currentUrl;
+    }
+
+    /**
+     * @param currentUrl the currentUrl to set
+     */
+    public void setCurrentUrl(String currentUrl) {
+        this.currentUrl = currentUrl;
     }
 }
