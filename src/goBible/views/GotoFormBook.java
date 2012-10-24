@@ -74,7 +74,7 @@ public class GotoFormBook extends Form implements ItemCommandListener, CommandLi
             }
         
             ImageItem im = new ImageItem(null, txtimg, Item.LAYOUT_SHRINK | Item.LAYOUT_LEFT, String.valueOf(i), Item.HYPERLINK);
-            im.setDefaultCommand(new Command("Set", Command.ITEM, 1));
+            im.setDefaultCommand(new Command(GoBible.getString("UI-Select"), Command.ITEM, 1));
             im.setPreferredSize(width, height);
 
             // icl is ItemCommandListener   

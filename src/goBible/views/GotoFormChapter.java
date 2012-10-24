@@ -42,8 +42,8 @@ public class GotoFormChapter extends Form implements ItemCommandListener, Comman
 
         private int bookIndex;
                 
-	private Command cancelCommand = new Command(GoBible.getString("UI-Cancel"), Command.CANCEL, 0);
-        private Command backCommand = new Command(GoBible.getString("UI-Back"), Command.OK, 0);
+	private Command cancelCommand = new Command(GoBible.getString("UI-Back"), Command.CANCEL, 0);
+//        private Command backCommand = new Command(GoBible.getString("UI-Back"), Command.OK, 0);
 	
 	/**
 	 * Creates a search for with search criteria and from and to books to search in.
@@ -77,17 +77,16 @@ public class GotoFormChapter extends Form implements ItemCommandListener, Comman
                     int btntxtWidth = f.stringWidth(btntext);                                       
                     txtimg.getGraphics().drawString(btntext, width/2-btntxtWidth/2, 1, 0);                    
                                         
-                    ImageItem im = new ImageItem(null, txtimg, Item.LAYOUT_SHRINK|Item.LAYOUT_LEFT, btntext, Item.HYPERLINK);
-                    im.setDefaultCommand(new Command("Set", Command.ITEM, 1)); 
+                                        ImageItem im = new ImageItem(null, txtimg, Item.LAYOUT_SHRINK|Item.LAYOUT_LEFT, btntext, Item.HYPERLINK);                    
+                    im.setDefaultCommand(new Command(GoBible.getString("UI-Select"), Command.ITEM, 1)); 
                     im.setPreferredSize(width, height);
                     
                     // icl is ItemCommandListener   
                     im.setItemCommandListener(this);
                     this.append(im);
-                }
-                
+                }                
 		addCommand(cancelCommand);
-                addCommand(backCommand);		
+//                addCommand(backCommand);		
 		
 		setCommandListener(this);
                 
@@ -105,16 +104,10 @@ public class GotoFormChapter extends Form implements ItemCommandListener, Comman
 	public void commandAction(Command command, Displayable display)
 	{
             switch (command.getCommandType())
-            {			
-                case Command.OK: 
-                {
-                    goBible.showGotoScreen();
-                    break;
-                }
-                case Command.BACK:
+            {	
                 case Command.CANCEL: 
                 {
-                    goBible.showMainScreen();
+                    goBible.showGotoScreen();
                     break;
                 }
             }

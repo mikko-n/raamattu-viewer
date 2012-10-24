@@ -133,7 +133,8 @@ public class FileBrowser extends List implements CommandListener {
         iconList = new Image[]{fileIcon, dirIcon, selectedIcon};
 
         showDir();
-        
+        addCommand(SELECT_FILE_COMMAND);
+        addCommand(CANCEL_COMMAND);
         setSelectCommand(SELECT_FILE_COMMAND);
         setCommandListener(this);
     }
