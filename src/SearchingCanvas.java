@@ -1,5 +1,3 @@
-package goBible.canvas;
-
 //
 //  SearchingCanvas.java
 //  GoBible
@@ -23,10 +21,6 @@ package goBible.canvas;
 //	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-import goBible.base.GoBible;
-import goBible.common.SearchOptions;
-import goBible.views.SearchResultsList;
-import goBible.common.GBCToolkit;
 import javax.microedition.lcdui.*;
 
 public class SearchingCanvas extends Canvas implements CommandListener, Runnable
@@ -74,15 +68,15 @@ public class SearchingCanvas extends Canvas implements CommandListener, Runnable
             goBible.searchResults.removeAllElements();
             goBible.lastSearchIndex = 0;	// dlh - have to reset it for the new search
 
-            this.searchFromBookIndex = snapshot.getFromBook();
-            this.searchToBookIndex = snapshot.getToBook();
-            this.searchString = snapshot.getSearchString();
+            this.searchFromBookIndex = snapshot.fromBook;
+            this.searchToBookIndex = snapshot.toBook;
+            this.searchString = snapshot.searchString;
             addCommand(new Command(GoBible.getString("UI-Stop"), Command.STOP, 0));
             setCommandListener(this);
 
-            currentBook = snapshot.getCurrentBook();
-            currentChapter = snapshot.getCurrentChapter();
-            currentVerse = snapshot.getCurrentVerse();
+            currentBook = snapshot.currentBook;
+            currentChapter = snapshot.currentChapter;
+            currentVerse = snapshot.currentVerse;
 
             snapshot.dump();
 
@@ -156,7 +150,7 @@ public class SearchingCanvas extends Canvas implements CommandListener, Runnable
                     this.lastChapter,
                     this.lastVerse
                     );
-            opts.setExhausted(exhausted);
+            opts.exhausted = exhausted;
             return opts;
         }
         /**
@@ -416,21 +410,10 @@ public class SearchingCanvas extends Canvas implements CommandListener, Runnable
             }
 	}
 
-        public final static boolean find(char[] haystack, char[] needle) {
-            if (find(haystack,0, haystack.length, needle) == -1) {
-                return false;
-            }
-            return true;
-        }
 	/**
-        * Finds the first occurrence of the searchData string within
-	* the data string starting at the offset specified.
-        * @param data haystack
-        * @param offset
-        * @param end
-        * @param searchData needle
-        * @return 
-        */
+	 * Finds the first occurrence of the searchData string within
+	 * the data string starting at the offset specified.
+	 */
 	private final static int find(char[] data, int offset, int end, char[] searchData)
 	{
 		//return findUnicode(data, offset, end, searchData);

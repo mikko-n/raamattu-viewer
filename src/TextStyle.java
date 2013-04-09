@@ -1,5 +1,3 @@
-package goBible.common;
-import goBible.base.GoBible;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
@@ -111,10 +109,6 @@ public class TextStyle {
             // note difference in specification
             // String.substring(startIndex, endIndex);
             return stringWidth(str.substring(offset, len + offset));
-        }
-        
-        public void drawMapLink(int x, int y) {
-        
         }
     /**
      * 

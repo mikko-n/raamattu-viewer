@@ -387,7 +387,7 @@
         <fail unless="obfuscated.classes.dir">Must set obfuscated.classes.dir</fail>
         <fail unless="obfuscator.srcjar">Must set obfuscator.srcjar</fail>
         <fail unless="obfuscator.destjar">Must set obfuscator.destjar</fail>
-        <property name="obfuscator.classpath" value=""/>
+        <property name="obfuscator.classpath" value="C:\Program Files (x86)\NetBeans 7.3\proguard4.9\lib\proguard.jar"/>
         <dirname file="${obfuscator.srcjar}" property="obfuscator.srcjar.dir"/>
         <dirname file="${obfuscator.destjar}" property="obfuscator.destjar.dir"/>
         <mkdir dir="${obfuscator.srcjar.dir}"/>
