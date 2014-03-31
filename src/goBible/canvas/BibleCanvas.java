@@ -110,6 +110,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 	private Command exitCommand = new Command(GoBible.getString("UI-Exit"), Command.EXIT, 0);
 	private Command cancelCommand = new Command(GoBible.getString("UI-Cancel"), Command.CANCEL, 0);
         private Command changeTranslationCommand = new Command(GoBible.getString("UI-Change-Translation"), Command.SCREEN, 0);
+        private Command addNoteCommand = new Command(GoBible.getString("UI-Add-Note"), Command.SCREEN, 0);
         
         private Command[] defaultCommands = {
             gotoCommand, /* Note this is a Command.OK command, so it will not appear on the list of usual commands */
@@ -117,6 +118,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
             searchNextCommand, /* ExtendedUI */
             searchResultsCommand,
             changeTranslationCommand,
+            addNoteCommand,
             addBookmarkCommand,
             bookmarksCommand,
             historyCommand,
@@ -657,6 +659,9 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                             }
                             else if (command == changeTranslationCommand) {
                                     goBible.showChangeTranslationScreen();
+                            }
+                            else if (command == addNoteCommand) {
+                                    goBible.showAddNoteScreen();
                             }
 
                             break;
@@ -1536,8 +1541,10 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 		
 		g.drawString(label, buttonX + 3, buttonY + 3, Graphics.TOP | Graphics.LEFT);
 	}
-        /** Paint a verse, given a verseIndex and lineOffset.
-         *
+        /** 
+         * Paints header bar
+         * Paint a verse, given a verseIndex and lineOffset.
+         * 
          * to move a screen up/down, we simply subtract/add $numLinesPerScreen to lineOffset
          *
          */
@@ -1932,7 +1939,13 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
                 }
             }
             // inject verse number
+            boolean isNote = goBible.isNoteForVerse(ctx.getBookIndex(), ctx.getChapterIndex(), ctx.getVerseIndex());
+            
             String verseNumberString = goBible.localizeDigits((verseNumberOffset + ctx.getVerseIndex()) + "");
+            if (isNote) {
+                verseNumberString += "'";
+            }
+            
             if (TextStyle.reverseCharacters) { // In general we do not reverse digits
                 verseNumberString = new StringBuffer(verseNumberString).reverse().toString();
             }
@@ -2106,7 +2119,7 @@ public class BibleCanvas extends SuperCanvas implements CommandListener, Runnabl
 
             return (currentLine < 0)? 0: currentLine;
         }
-
+       
         private void paintWord2
                 (boolean doPaint,
                 PaintContext context,

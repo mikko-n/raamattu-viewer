@@ -126,8 +126,7 @@ public class GoBible extends MIDlet implements Runnable
 
     // UI Properties file Strings
     public static Hashtable uiProperties = new Hashtable();
-
-
+    
     // Instance variables
 
     public Display display;
@@ -186,7 +185,11 @@ public class GoBible extends MIDlet implements Runnable
 
     // Bookmarks
     public Vector bookmarks = new Vector();
-
+    
+    // Notes
+    public Vector verseNotes = new Vector();
+    public BookmarkEntry currentVerseNote;
+    
     // Key Settings
     // Defaults are given here.
     public int keySettings[] = {
@@ -259,6 +262,7 @@ public class GoBible extends MIDlet implements Runnable
                 readBookmarks();
                 readHistory();
                 readKeySettings();
+                
 
                 if (!bookUrl.equals("") && !translation.equals("")) {
                     currentUrl = "file:///E:/"+bookUrl+translation;
@@ -514,6 +518,9 @@ public class GoBible extends MIDlet implements Runnable
                 bibleCanvas.setFullScreenMode(fullScreen);
         }
 
+        // init ok, read notes for current book
+        readNotesForBook();
+        
         // Some of the values may have changed so refresh the display accordingly
         bibleCanvas.update();      
     }
@@ -633,6 +640,33 @@ public class GoBible extends MIDlet implements Runnable
         }
         display.setCurrent(fileBrowser);
 
+    }
+    
+    
+    public void showAddNoteScreen() {        
+        NotesEditor noteEditor = null;
+        if (noteEditor == null) {
+            noteEditor = new NotesEditor(this);                       
+            //noteEditor.setPosition(currentBookIndex, currentChapterIndex, currentVerseIndex);
+        }
+        Enumeration notes = verseNotes.elements();
+        currentVerseNote = null;
+        
+        while (notes.hasMoreElements()) {
+            BookmarkEntry entry = (BookmarkEntry)notes.nextElement();
+            Log("[GoBible.showAddNoteScreen] found entry: "+entry.getBookIndex()+" "+entry.getChapterIndex()+":"+entry.getVerseIndex()+": "+entry.getExcerpt());
+            if (entry.getChapterIndex() == bibleCanvas.currentChapter() &&
+                entry.getVerseIndex() == bibleCanvas.currentVerse()) {
+                currentVerseNote = entry;
+                Log("[GoBible.showAddNoteScreen] found previous entry: "+currentVerseNote.getExcerpt());
+            }
+        }
+        if (currentVerseNote == null) {
+            currentVerseNote = new BookmarkEntry(bibleCanvas.currentBook(), bibleCanvas.currentChapter(), bibleCanvas.currentVerse(), "New");
+            Log("[GoBible.showAddNoteScreen] no previous entry, initialized new one");
+        }
+        noteEditor.setString(getNoteForVerse());
+        display.setCurrent(noteEditor);
     }
     
 //     public FileBrowser getFileBrowser() {
@@ -1345,6 +1379,189 @@ public class GoBible extends MIDlet implements Runnable
             }
     }
 
+    String noteRecordStoreName = "verseNotes";
+    
+    /**
+     * Reads notes for current book from recordstore
+     * 
+     * Recycles object used to store bookmarks (BookmarkEntry has
+     * ability to store book, chapter, verse indexes + string for actual note text)
+     */
+    public void readNotesForBook() {
+        try {
+            RecordStore store = RecordStore.openRecordStore(noteRecordStoreName, true);
+            
+            // special case; if there's no previous entries, 
+            // create store entry for every book
+            if (store.getNumRecords() <= 0) {
+                for (int i = 0; i < bibleSource.getNumberOfBooks(); i++) {
+                    store.addRecord(null, 0, 0);
+                }
+                Log("[GoBible.readNotesForBook] record store entries created");
+            }
+
+            if (store.getNumRecords() > bibleCanvas.currentBook()+1) {
+                // read notes for current book
+                byte[] data = store.getRecord(bibleCanvas.currentBook()+1);
+                
+                // if there is notes for current book, read them in
+                if (data != null) {
+                    DataInputStream input = new DataInputStream(new ByteArrayInputStream(data));
+                    int numberOfNotes = input.readUnsignedShort();
+                    
+                    // remove previously read entries from in-memory vector
+                    if (verseNotes == null) {
+                        verseNotes = new Vector();
+                    }
+                    verseNotes.removeAllElements();
+                    for (int i = 0; i < numberOfNotes; i++) {
+
+                        BookmarkEntry note = new BookmarkEntry(input);
+                        verseNotes.addElement(note);
+                        Log("[GoBible.readNotesForBook] read note: "+note.getExcerpt());
+                    }
+                    input.close();
+                } else {
+                    Log("[GoBible.readNotesForBook] no data for current book ("+bibleCanvas.currentBook()+")");
+                }
+            }
+        }
+//        catch (IOException ee) {}
+//        catch (RecordStoreException e) {}
+        catch (Exception ex) {
+            Log("[GoBible.readNotesForBook] Read notes exception! " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Adds a new note or updates previously existing note to record store
+     * @param noteText Note text for currently active verse
+     */
+    public void addToNotes(String noteText) {        
+        if (currentVerseNote == null) {            
+            currentVerseNote = new BookmarkEntry(bibleCanvas.currentBook(), bibleCanvas.currentChapter(), bibleCanvas.currentVerse(), noteText);
+        } else {
+            currentVerseNote.setBookIndex(bibleCanvas.currentBook());
+            currentVerseNote.setChapterIndex(bibleCanvas.currentChapter());
+            currentVerseNote.setVerseIndex(bibleCanvas.currentVerse());
+            currentVerseNote.setExcerpt(noteText);
+        }
+        boolean addNewElement = true;
+        
+        int indexToUpdate = -1;
+        int currentIndex = 0;
+        
+        Log("[GoBible.addToNotes] adding note for book:"+bibleCanvas.currentBook()+", ch:"+bibleCanvas.currentChapter()+", verse:"+bibleCanvas.currentVerse());
+
+        for (Enumeration e = verseNotes.elements(); e.hasMoreElements();) {            
+            BookmarkEntry bookmark = (BookmarkEntry) e.nextElement();
+            
+            if (currentVerseNote != null) {
+                if (bookmark.getBookIndex() == currentVerseNote.getBookIndex()
+                        && bookmark.getChapterIndex() == currentVerseNote.getChapterIndex()
+                        && bookmark.getVerseIndex() == currentVerseNote.getVerseIndex()) 
+                {
+                    addNewElement = false;                    
+                    indexToUpdate = currentIndex;
+                }
+            }
+            currentIndex++;
+        }
+        
+        if (addNewElement) {
+            verseNotes.addElement(currentVerseNote);
+            Log("[GoBible.addToNotes] added new element to notes");
+        } else if (indexToUpdate >= 0) {
+            verseNotes.setElementAt(currentVerseNote, indexToUpdate);
+            Log("[GoBible.addToNotes] updated previous note entry");
+        }
+        
+        storeNotesForBook();
+        
+    }
+    /**
+     * Stores user notes for current book
+     */
+    public void storeNotesForBook() {
+        try {
+            // Open the "Bookmarks" record store and create it if necessary
+            RecordStore store = RecordStore.openRecordStore(noteRecordStoreName, true);
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            DataOutputStream output = new DataOutputStream(byteArrayOutputStream);
+
+            // Write out the number of bookmarks
+            output.writeShort(verseNotes.size());
+
+            // Write out the history
+            for (Enumeration e = verseNotes.elements(); e.hasMoreElements();) {
+                BookmarkEntry bookmark = (BookmarkEntry) e.nextElement();               
+                bookmark.write(output);
+            }
+
+            output.close();
+
+            byte[] data = byteArrayOutputStream.toByteArray();
+
+            // special case; if there's no previous entries, 
+            // create store entry for every book
+            if (store.getNumRecords() <= 0) {
+                for (int i = 1; i < bibleSource.getNumberOfBooks()+1; i++) {
+                    Log("[GoBible.storeNotesForBook] record added, id: "+store.addRecord(null, 0, 0));
+                }
+                Log("[GoBible.storeNotesForBook] record store entries created");
+            }
+
+            // Make sure the record store isn't empty 
+            if (store.getNumRecords() > 0) 
+            {
+                store.setRecord(bibleCanvas.currentBook()+1, data, 0, data.length);
+                Log("[GoBible.storeNotesForBook] record store entry updated for book: "+(bibleCanvas.currentBook()+1));
+            }
+
+        } catch (IOException e) {
+        } catch (RecordStoreException e) {
+        }
+    }
+    
+    /**
+     * Returns note for current passage, if any.
+     * @return null if no note
+     */
+    public String getNoteForVerse() {
+        if (verseNotes != null && verseNotes.size() > 0) {
+            Enumeration notes = verseNotes.elements();
+            while (notes.hasMoreElements()) {
+                BookmarkEntry note = (BookmarkEntry)notes.nextElement();
+                if (note != null) {
+                    if (note.getBookIndex() == bibleCanvas.currentBook() &&
+                        note.getChapterIndex() == bibleCanvas.currentChapter() &&
+                        note.getVerseIndex() == bibleCanvas.currentVerse()) {
+                        return note.getExcerpt();
+                    }
+                }
+            }            
+        }
+        return null;
+    }
+    
+    public boolean isNoteForVerse(int book, int chapter, int verse) {
+        if (verseNotes != null && verseNotes.size() > 0) {
+            Enumeration notes = verseNotes.elements();
+            while (notes.hasMoreElements()) {
+                BookmarkEntry note = (BookmarkEntry)notes.nextElement();
+                if (note != null) {
+                    if (note.getBookIndex() == book &&
+                        note.getChapterIndex() == chapter &&
+                        note.getVerseIndex() == verse) {
+                        return true;
+                    }
+                }
+            }            
+        }
+        return false;
+    }
+    
     /**
      * Bookmarks are stored in the record store under the name "Bookmarks".
      */

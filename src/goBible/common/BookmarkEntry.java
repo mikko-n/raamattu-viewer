@@ -120,4 +120,5 @@ public class BookmarkEntry
     public void setVerseIndex(int verseIndex) {
         this.verseIndex = verseIndex;
     }
+    
 }
